@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const CheckoutForm = ({ totalAmount, paymentId }) => {
+const CheckoutForm = ({ totalAmount, paymentId, userId }) => {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -21,7 +21,7 @@ const CheckoutForm = ({ totalAmount, paymentId }) => {
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `http://localhost:3000/payment/success?amount=${totalAmount}&paymentId=${paymentId}`, // Redirect after successful payment
+        return_url: `http://localhost:3000/payment/success?amount=${totalAmount}&paymentId=${paymentId}&userId=${userId}`, // Redirect after successful payment
       },
     });
 

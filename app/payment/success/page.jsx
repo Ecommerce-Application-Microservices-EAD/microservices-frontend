@@ -4,29 +4,30 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export default function PaymentSuccess({ searchParams }) {
-  const { amount, paymentId } = searchParams;
+  const { amount, paymentId, userId } = searchParams;
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const removeCartItems = async () => {
+    const clearCart = async (userId) => {
       try {
-        const response = await axios.post("/api/remove-cart-items", {
-          paymentId,
+        const response = await axios.delete(`http://localhost:8085/api/v1/cart/clear`, {
+          params: { userId },
         });
-
-        if (response.status !== 200) {
-            setError("Failed to remove cart items");
-            return;
-        }
-
-        console.log("Cart items removed successfully");
+        console.log(response.data); // Success message
       } catch (error) {
-        console.error("Error:", error.message);
+        console.error('Error clearing cart:', error.response.data); // Error message
       }
     };
 
-    removeCartItems();
-  }, [paymentId]);
+    if (paymentId) {
+      clearCart(userId);
+    } else {
+      setError('Payment ID not found in URL');
+    }
+  }, [paymentId, userId]);
+
+
+  
 
   return (
     <main className="max-w-6xl mx-auto p-10 text-white text-center border m-10 rounded-md bg-gradient-to-tr from-blue-500 to-purple-500">
