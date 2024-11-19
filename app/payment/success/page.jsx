@@ -27,6 +27,22 @@ export default function PaymentSuccess({ searchParams }) {
   }, [paymentId, userId]);
 
 
+  useEffect(() => {
+    const updatePaymentStatus = async (paymentId) => {
+      try {
+        const response = await axios.post(`http://localhost:8085/api/payments/${paymentId}/confirm`);
+        console.log(response.data); // Success message
+      } catch (error) {
+        console.error('Error updating payment status:', error.response.data); // Error message
+      }
+    };
+
+    if (paymentId) {
+      updatePaymentStatus(paymentId);
+    }
+    
+  }, [paymentId, userId]);
+
   
 
   return (
@@ -49,6 +65,12 @@ export default function PaymentSuccess({ searchParams }) {
           </div>
         )}
 
+      </div>
+
+      <div className="text-2xl">
+        <button className="bg-white p-2 rounded-md text-purple-500 mt-5 text-2xl font-bold">
+          <a href="/">Go back to the home page</a>
+        </button>
       </div>
     </main>
   );

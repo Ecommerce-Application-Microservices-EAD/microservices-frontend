@@ -1,14 +1,9 @@
-// App/payment/cart.jsx
-
-
 import React, { useEffect, useState } from 'react';
-import './styles.css'; 
-import axios from 'axios'; 
+import axios from 'axios';
 
-const Cart = ({  userId ,  onTotalAmountChange }) => {
+const Cart = ({ userId, onTotalAmountChange }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const userId = 12345; 
 
   // Function to fetch cart items
   const fetchCartItems = async () => {
@@ -25,7 +20,7 @@ const Cart = ({  userId ,  onTotalAmountChange }) => {
 
   // Calculate total amount
   const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const roundedTotalAmount = Math.round(totalAmount * 100)/100;
+  const roundedTotalAmount = Math.round(totalAmount * 100) / 100;
 
   useEffect(() => {
     fetchCartItems();
@@ -34,30 +29,30 @@ const Cart = ({  userId ,  onTotalAmountChange }) => {
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []); // Empty dependency array to run only once on mount
 
-
   useEffect(() => {
     onTotalAmountChange(roundedTotalAmount);
   }, [roundedTotalAmount, onTotalAmountChange]);
 
   return (
-    <div className="cart">
-      <h2 className="section-title">Your Cart</h2>
+    <div className="w-full bg-gray-800 rounded-lg p-6 shadow-lg">
+      <h2 className="text-2xl font-semibold text-white mb-4 text-center">Your Cart</h2>
+
       {loading ? (
-        <p>Loading...</p>
+        <div className="text-center text-white">Loading...</div>
       ) : cartItems.length > 0 ? (
         <>
-          <ul className="cart-list">
+          <ul className="space-y-4">
             {cartItems.map((item) => (
-              <li key={item.productId} className="cart-item">
-                <span>{item.name}</span>
-                <span>${item.price} x {item.quantity}</span>
+              <li key={item.productId} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+                <span className="text-white">{item.name}</span>
+                <span className="text-white">${item.price} x {item.quantity}</span>
               </li>
             ))}
           </ul>
-          <p className="total-amount">Total: ${roundedTotalAmount}</p>
+          <p className="mt-6 text-xl font-semibold text-white text-center">Total: ${roundedTotalAmount}</p>
         </>
       ) : (
-        <p className="empty-cart">Your cart is empty.</p>
+        <div className="text-center text-white">Your cart is empty.</div>
       )}
     </div>
   );
