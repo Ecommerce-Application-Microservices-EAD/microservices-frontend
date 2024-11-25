@@ -18,6 +18,18 @@ const Cart = ({ userId, onTotalAmountChange }) => {
     }
   };
 
+  // Function to remove item from cart
+  const removeItemFromCart = async (productId) => {
+    try {
+       await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
+        params: { userId }
+      });
+      fetchCartItems(); // Refresh cart items after removal
+    } catch (error) {
+      console.error('Error removing item from cart:', error.response.data);
+    }
+  };
+
   // Calculate total amount
   const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const roundedTotalAmount = Math.round(totalAmount * 100) / 100;
@@ -45,7 +57,13 @@ const Cart = ({ userId, onTotalAmountChange }) => {
             {cartItems.map((item) => (
               <li key={item.productId} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
                 <span className="text-white">{item.name}</span>
-                <span className="text-white">${item.price} x {item.quantity}</span>
+                <span className="text-white">${item.price} x {item.quantity} = ${item.price * item.quantity} </span>
+                <button
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => removeItemFromCart(item.productId)}
+                >
+                  Remove
+                </button>
               </li>
             ))}
           </ul>
