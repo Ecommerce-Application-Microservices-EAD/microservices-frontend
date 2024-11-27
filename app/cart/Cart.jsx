@@ -1,27 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
-const Cart = ({ userId, onTotalAmountChange }) => {
+// Custom hook for fetching cart items
+const useCartItems = (userId) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Function to fetch cart items
   const fetchCartItems = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8085/api/v1/cart/${userId}`);
       setCartItems(response.data.items || []);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching cart items:', error);
       setCartItems([]); // Set to empty in case of error
+    } finally {
       setLoading(false);
     }
   };
 
-  // Function to remove item from cart
+  useEffect(() => {
+    fetchCartItems();
+    const intervalId = setInterval(fetchCartItems, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, [userId]);
+
+  return { cartItems, loading, fetchCartItems };
+};
+
+const CartItem = ({ item, onRemove }) => (
+  <li className="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+    <span className="text-white">{item.name}</span>
+    <span className="text-white">${item.price} x {item.quantity} = ${item.price * item.quantity}</span>
+    <button
+      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      onClick={() => onRemove(item.productId)}
+    >
+      Remove
+    </button>
+  </li>
+);
+
+CartItem.propTypes = {
+  item: PropTypes.shape({
+    productId: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    quantity: PropTypes.number.isRequired,
+  }).isRequired,
+  onRemove: PropTypes.func.isRequired,
+};
+
+const Cart = ({ userId, onTotalAmountChange }) => {
+  const { cartItems, loading, fetchCartItems } = useCartItems(userId);
+
   const removeItemFromCart = async (productId) => {
     try {
-       await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
+      await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
         params: { userId }
       });
       fetchCartItems(); // Refresh cart items after removal
@@ -30,16 +66,13 @@ const Cart = ({ userId, onTotalAmountChange }) => {
     }
   };
 
-  // Calculate total amount
-  const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const roundedTotalAmount = Math.round(totalAmount * 100) / 100;
+  const totalAmount = useMemo(() => {
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  }, [cartItems]);
 
-  useEffect(() => {
-    fetchCartItems();
-    const intervalId = setInterval(fetchCartItems, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
-  }, []); // Empty dependency array to run only once on mount
+  const roundedTotalAmount = useMemo(() => {
+    return Math.round(totalAmount * 100) / 100;
+  }, [totalAmount]);
 
   useEffect(() => {
     onTotalAmountChange(roundedTotalAmount);
@@ -55,16 +88,7 @@ const Cart = ({ userId, onTotalAmountChange }) => {
         <>
           <ul className="space-y-4">
             {cartItems.map((item) => (
-              <li key={item.productId} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
-                <span className="text-white">{item.name}</span>
-                <span className="text-white">${item.price} x {item.quantity} = ${item.price * item.quantity} </span>
-                <button
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={() => removeItemFromCart(item.productId)}
-                >
-                  Remove
-                </button>
-              </li>
+              <CartItem key={item.productId} item={item} onRemove={removeItemFromCart} />
             ))}
           </ul>
           <p className="mt-6 text-xl font-semibold text-white text-center">Total: ${roundedTotalAmount}</p>
@@ -74,6 +98,11 @@ const Cart = ({ userId, onTotalAmountChange }) => {
       )}
     </div>
   );
+};
+
+Cart.propTypes = {
+  userId: PropTypes.string.isRequired,
+  onTotalAmountChange: PropTypes.func.isRequired,
 };
 
 export default Cart;
