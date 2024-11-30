@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function CartPage() {
+  const router = useRouter();
+
   const { cart, addToCart, removeFromCart, clearCart, getCartTotal } = useCart()
 
   const cartItems = cart.map(item => ({
@@ -53,7 +56,7 @@ export default function CartPage() {
               <Button variant="outline" onClick={clearCart}>
                 <Trash2 className="mr-2 h-4 w-4" /> Clear Cart
               </Button>
-              <Button>Proceed to Checkout</Button>
+              <Button onClick={()=>router.push('/payment')}>Proceed to Checkout</Button>
             </CardFooter>
           </Card>
         </>
