@@ -1,44 +1,121 @@
-import { useCart } from '@/lib/CartContext'
-import { dummyProducts } from '@/lib/dummyData'
-import { Button } from '@/components/ui/button'
-import { ShoppingCart, Star } from 'lucide-react'
-import Image from 'next/image'
+"use client";
 
-export function generateStaticParams() {
-  return dummyProducts.map((product) => ({
-    id: product.id.toString(),
-  }))
-}
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getProductById } from "@/services/productService";
+import { Product } from "@/app/types/Product";
+import { AlertCircle } from "lucide-react";
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const { addToCart } = useCart()
-  const product = dummyProducts.find(p => p.id === parseInt(params.id))
+const ProductPage = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); // Added loading state
 
-  if (!product) {
-    return <div className="container mx-auto px-4 py-8">Product not found</div>
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true); // Start loading
+      try {
+        const fetchedProduct = await getProductById(id as string);
+        setProduct(fetchedProduct);
+        setError(null); // Clear previous errors
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError("Failed to load product details. Please try again later.");
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  // Function to convert base64 string to image
+  const getImageFromBase64 = (base64String: string) => {
+    return `data:image/png;base64,${base64String}`;
+  };
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="container mx-auto p-4 space-y-6">
+        <h1 className="text-3xl font-semibold text-center text-red-600 dark:text-red-400">
+          <AlertCircle className="inline-block mr-2 h-6 w-6" />
+          Error
+        </h1>
+        <p className="text-center text-lg text-red-500 dark:text-red-300">{error}</p>
+      </div>
+    );
   }
 
+  // Handle loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 space-y-6">
+        <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">Loading...</h1>
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          Please wait while we load the product details.
+        </p>
+      </div>
+    );
+  }
+
+  // Handle product not found or empty data case
+  if (!product) {
+    return (
+      <div className="container mx-auto p-4 space-y-6">
+        <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">
+          Product Not Found
+        </h1>
+        <p className="text-center text-lg text-gray-500 dark:text-gray-400">
+          The product you're looking for doesn't exist or has been removed.
+        </p>
+      </div>
+    );
+  }
+
+  // Render the product details
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <Image src={product.image} alt={product.name} className="w-full h-auto rounded-lg shadow-lg" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-          <p className="text-2xl font-semibold mb-4">${product.price}</p>
-          <div className="flex items-center mb-4">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-5 w-5 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-            ))}
-            <span className="ml-2 text-sm text-gray-600">({product.rating})</span>
-          </div>
-          <p className="text-gray-600 mb-6">{product.description}</p>
-          <Button className="w-full md:w-auto" onClick={() => addToCart(product.id)}>
-            <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-          </Button>
+    <div className="container mx-auto p-4 space-y-6">
+      <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">
+        Product Details
+      </h1>
+      <div className="flex flex-col md:flex-row items-start justify-center gap-8">
+        {/* Display product image with fixed width */}
+        <img
+          src={getImageFromBase64(product.imageData)}
+          alt={product.name}
+          className="w-72 h-auto object-cover rounded-md shadow-md mb-6 md:mb-0"
+        />
+        <div className="flex flex-col items-center md:items-start w-full md:w-[60%]">
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+            <strong>{product.name}</strong>
+          </p>
+
+          <p className="text-lg font-semibold text-green-600 dark:text-green-400 mt-4">
+            ${product.price}
+          </p>
+
+          {product.category && (
+            <p className="text-md bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 mt-2 px-4 py-1 rounded-full inline-block">
+              {product.category}
+            </p>
+          )}
+
+          <p className="text-md text-gray-700 dark:text-gray-300 mt-2">{product.description}</p>
+
+          <button
+            className="mt-6 bg-blue-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-600 transition dark:bg-blue-600 dark:hover:bg-blue-700"
+            onClick={() => console.log("Add to Cart")}
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default ProductPage;
