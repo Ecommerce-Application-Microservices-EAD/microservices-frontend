@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes'
 import { useCart } from '@/lib/CartContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Moon, Sun, ShoppingCart, User } from 'lucide-react'
+import { Moon, Sun, ShoppingCart, User, ShoppingBag } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function Header() {
@@ -40,6 +40,11 @@ export default function Header() {
                   {cartItemsCount}
                 </span>
               )}
+            </Button>
+          </Link>
+          <Link href="/order">
+            <Button variant="ghost" size="icon">
+              <ShoppingBag className="h-5 w-5" />
             </Button>
           </Link>
           <Link href="/profile">
