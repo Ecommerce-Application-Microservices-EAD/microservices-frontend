@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Moon, Sun, ShoppingCart, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const { cart } = useCart()
@@ -28,7 +29,6 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold">NextShop</Link>
         <div className="flex items-center space-x-4">
-          <Input type="search" placeholder="Search products..." className="w-64" />
           <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
