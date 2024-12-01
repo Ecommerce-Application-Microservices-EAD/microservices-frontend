@@ -21,7 +21,7 @@ export default function OrderPage() {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <h1 className="text-2xl font-bold p-2">Your Orders</h1>
+      <h1 className="text-2xl font-bold p-2">Order Product</h1>
       <div className="grid sm:grid-cols-[65%_30%] gap-4">
         <Card className="rounded-md flex flex-col border-2 p-5">
           {orders.length > 0 ? (
@@ -46,7 +46,7 @@ export default function OrderPage() {
               </CardContent>
             ))
           ) : (
-            <p className="text-center">No orders placed yet.</p>
+            <p className="text-center">No Items Found.</p>
           )}
         </Card>
 

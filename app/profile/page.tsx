@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
+  const route = useRouter();
   const [user, setUser] = useState({
     name: 'John Doe',
     phone: '(+94) 456-7890',
@@ -114,7 +116,10 @@ export default function ProfilePage() {
               <span className="font-medium">Phone:</span>
               <span className="text-right">{user.phone}</span>
             </div>
+            <div className='flex gap-2'>
             <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+            <Button onClick={() => route.push("/order/myorder")}>My Orders</Button>
+            </div>
           </>
         )}
       </div>
