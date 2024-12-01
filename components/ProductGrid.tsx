@@ -75,8 +75,8 @@ export default function ProductGrid({ products }: { products: Product[] | null }
             <Button
               className="w-full"
               onClick={(e) => {
-                e.stopPropagation(); // Prevents navigation on button click
-                addToCart(product.id); // Add the product to cart
+                e.stopPropagation(); 
+                addToCart(product.id); 
               }}
             >
               <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart

@@ -10,20 +10,20 @@ const ProductPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Added loading state
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       try {
         const fetchedProduct = await getProductById(id as string);
         setProduct(fetchedProduct);
-        setError(null); // Clear previous errors
+        setError(null);
       } catch (err) {
         console.error("Error fetching product:", err);
         setError("Failed to load product details. Please try again later.");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
@@ -32,12 +32,10 @@ const ProductPage = () => {
     }
   }, [id]);
 
-  // Function to convert base64 string to image
   const getImageFromBase64 = (base64String: string) => {
     return `data:image/png;base64,${base64String}`;
   };
 
-  // Handle error state
   if (error) {
     return (
       <div className="container mx-auto p-4 space-y-6">
@@ -50,7 +48,6 @@ const ProductPage = () => {
     );
   }
 
-  // Handle loading state
   if (loading) {
     return (
       <div className="container mx-auto p-4 space-y-6">
@@ -62,7 +59,6 @@ const ProductPage = () => {
     );
   }
 
-  // Handle product not found or empty data case
   if (!product) {
     return (
       <div className="container mx-auto p-4 space-y-6">
@@ -76,14 +72,13 @@ const ProductPage = () => {
     );
   }
 
-  // Render the product details
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">
         Product Details
       </h1>
       <div className="flex flex-col md:flex-row items-start justify-center gap-8">
-        {/* Display product image with fixed width */}
+        
         <img
           src={getImageFromBase64(product.imageData)}
           alt={product.name}

@@ -1,11 +1,9 @@
-// services/productService.ts
 import axiosInstance from '@/lib/axiosConfig';
 import { Product } from '@/app/types/Product';
 
 //using hardcoded jwt token for now
 const token = ""
 
-// Fetch all products
 export const getAllProducts = async () => {
   try {
     const response = await axiosInstance.get("/products");
@@ -15,7 +13,6 @@ export const getAllProducts = async () => {
   }
 };
 
-// Fetch product by ID
 export const getProductById = async (id: string): Promise<Product> => {
   const response = await axiosInstance.get(`/products/${id}`);
   return response.data;
@@ -48,11 +45,9 @@ export const addProduct = async (product: any) => {
     return response.data;
   };
 
-// Update a product
 export const updateProductF = async (id: number, updatedProduct: any) => {
     const formData = new FormData();
   
-    // Include product details in FormData
     formData.append(
       "product",
       JSON.stringify({
@@ -64,7 +59,6 @@ export const updateProductF = async (id: number, updatedProduct: any) => {
       })
     );
   
-    // Append the new image or retain existing image data
     if (updatedProduct.image) {
       formData.append("image", updatedProduct.image);
     } else if (updatedProduct.imageData) {
@@ -81,8 +75,6 @@ export const updateProductF = async (id: number, updatedProduct: any) => {
     return response.data;
   };
   
-
-// Delete a product
 export const deleteProduct = async (id: number) => {
     await axiosInstance.delete(`/products/${id}`, {
       headers: {
@@ -91,7 +83,6 @@ export const deleteProduct = async (id: number) => {
     });
   };
 
-  // Search for products by keyword
 export const searchProducts = async (keyword: string): Promise<Product[]> => {
   try {
     const response = await axiosInstance.get(`/products/search`, {

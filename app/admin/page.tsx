@@ -55,7 +55,6 @@ export default function AdminPage() {
         }}
       />
 
-      {/* Add Product Modal */}
       {showAddForm && (
         <Modal
           isOpen={showAddForm}
@@ -67,12 +66,11 @@ export default function AdminPage() {
               setShowAddForm(false);
               toast("Product added successfully!", "success");
             }}
-            onClose={() => setShowAddForm(false)} // Pass onClose prop to AddProductForm
+            onClose={() => setShowAddForm(false)}
           />
         </Modal>
       )}
 
-      {/* Update Product Modal */}
       {showUpdateForm && productToUpdate && (
         <Modal
           isOpen={showUpdateForm}
@@ -91,12 +89,11 @@ export default function AdminPage() {
             onClose={() => {
               setProductToUpdate(null);
               setShowUpdateForm(false);
-            }} // Pass onClose prop to UpdateProductForm
+            }} 
           />
         </Modal>
       )}
 
-      {/* Delete Product Modal */}
       {showDeleteModal && productToDelete && (
         <Modal
           isOpen={showDeleteModal}
