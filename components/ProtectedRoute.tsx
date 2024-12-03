@@ -26,7 +26,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children 
     return null;
   }
 
-  // Render the protected content if the user is authenticated and has the correct role
   return <>{children}</>;
 };
 
