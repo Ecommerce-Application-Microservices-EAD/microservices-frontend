@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pencil } from 'lucide-react';
 
 export default function ProfilePage() {
   const [user, setUser] = useState({
@@ -39,12 +40,19 @@ export default function ProfilePage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">User Profile</h1>
       <div className="flex flex-col items-center">
-        <div className="w-32 h-32 mb-4">
-          <img
-            src={user.image}
-            alt="Profile Image"
-            className="w-full h-full object-cover rounded-full"
-          />
+        <div className="relative w-32 h-32 mb-4 group">
+          <div className={`w-full h-full rounded-full ${isEditing ? 'group-hover:border-2 group-hover:border-black' : ''}`}>
+            <img
+              src={user.image}
+              alt="Profile Image"
+              className={`w-full h-full object-cover rounded-full ${isEditing ? 'group-hover:blur-sm' : ''}`}
+            />
+          </div>
+          {isEditing && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Pencil className="h-8 w-8 text-white" />
+            </div>
+          )}
         </div>
         {/* value section */}
         {isEditing ? (
@@ -101,7 +109,9 @@ export default function ProfilePage() {
             </div>
             <div className="flex justify-between w-[30rem]">
               <Button onClick={handleSave}>Save</Button>
-              <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
             </div>
           </>
         ) : (
