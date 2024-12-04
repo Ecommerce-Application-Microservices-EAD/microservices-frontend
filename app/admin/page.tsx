@@ -1,110 +1,126 @@
-"use client"
-
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Pencil, Trash2 } from 'lucide-react'
-
-const initialProducts = [
-  { id: 1, name: 'Smartphone X', price: 799, stock: 50 },
-  { id: 2, name: 'Laptop Pro', price: 1299, stock: 30 },
-  { id: 3, name: 'Wireless Earbuds', price: 149, stock: 100 },
-  { id: 4, name: 'Smart Watch', price: 249, stock: 75 },
-  { id: 5, name: 'Digital Camera', price: 699, stock: 25 },
-  { id: 6, name: 'Gaming Console', price: 499, stock: 40 },
-]
+"use client";
+import { useState } from "react";
+import { useProducts } from "@/hooks/useProducts";
+import { Button } from "@/components/ui/button";
+import { ProductTable } from "@/components/ProductTable";
+import { AddProductForm } from "@/components/Forms/addProductForm";
+import { UpdateProductForm } from "@/components/Forms/updateProductForm";
+import { Modal } from "@/components/modal";
+import SearchBar from "@/components/searchBar";
+import { toast } from "@/components/Toast";
+import { Product } from "../types/Product"
 
 export default function AdminPage() {
-  const [products, setProducts] = useState(initialProducts)
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '' })
+  const {
+    products,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    searchResults,
+    handleSearchResults,
+  } = useProducts();
 
-  const handleAddProduct = (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    const product = {
-      id: products.length + 1,
-      name: newProduct.name,
-      price: parseFloat(newProduct.price),
-      stock: parseInt(newProduct.stock),
-    }
-    setProducts([...products, product])
-    setNewProduct({ name: '', price: '', stock: '' })
-  }
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
-  const handleDeleteProduct = (id: number) => {
-    setProducts(products.filter(product => product.id !== id))
-  }
+  const displayedProducts = searchResults || products;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Add New Product</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAddProduct} className="space-y-4">
-            <Input
-              placeholder="Product Name"
-              value={newProduct.name}
-              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-              required
-            />
-            <Input
-              type="number"
-              placeholder="Price"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-              required
-            />
-            <Input
-              type="number"
-              placeholder="Stock"
-              value={newProduct.stock}
-              onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-              required
-            />
-            <Button type="submit">Add Product</Button>
-          </form>
-        </CardContent>
-      </Card>
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
+        Admin Dashboard
+      </h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Product List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>${product.price}</TableCell>
-                  <TableCell>{product.stock}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="mr-2">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <Button
+        onClick={() => setShowAddForm(true)}
+        className="mb-4 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+      >
+        Add New Product
+      </Button>
+
+      <SearchBar onSearchResults={handleSearchResults} />
+
+      <ProductTable
+        products={displayedProducts}
+        onUpdate={(product: Product) => {
+          setProductToUpdate(product);
+          setShowUpdateForm(true);
+        }}
+        onDelete={(product: Product) => {
+          setProductToDelete(product);
+          setShowDeleteModal(true);
+        }}
+      />
+
+      {showAddForm && (
+        <Modal
+          isOpen={showAddForm}
+          onClose={() => setShowAddForm(false)}
+        >
+          <AddProductForm
+            onSubmit={async (formData: Product) => {
+              await addProduct(formData);
+              setShowAddForm(false);
+              toast("Product added successfully!", "success");
+            }}
+            onClose={() => setShowAddForm(false)}
+          />
+        </Modal>
+      )}
+
+      {showUpdateForm && productToUpdate && (
+        <Modal
+          isOpen={showUpdateForm}
+          onClose={() => {
+            setProductToUpdate(null);
+            setShowUpdateForm(false);
+          }}
+        >
+          <UpdateProductForm
+            product={productToUpdate}
+            onSubmit={async (updatedProduct: Product) => {
+              await updateProduct(updatedProduct);
+              setShowUpdateForm(false);
+              toast("Product updated successfully!", "success");
+            }}
+            onClose={() => {
+              setProductToUpdate(null);
+              setShowUpdateForm(false);
+            }} 
+          />
+        </Modal>
+      )}
+
+      {showDeleteModal && productToDelete && (
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+        >
+          <div className="text-center">
+            <p className="text-lg font-semibold mb-4">
+              Are you sure you want to delete "{productToDelete.name}"?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  await deleteProduct(productToDelete.id);
+                  setShowDeleteModal(false);
+                  toast("Product deleted successfully!", "success");
+                }}
+              >
+                Confirm
+              </Button>
+              <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
-  )
+  );
 }
