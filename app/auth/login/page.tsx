@@ -6,17 +6,30 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import axios from 'axios'
+import { useAuth } from "@/context/AuthProvider"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const { login } = useAuth();
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const router = useRouter()
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
+
     // TODO: Implement actual login logic
-    console.log('Login attempt:', { email, password })
-    router.push('/')
+    try {
+
+      await login(username, password);
+    
+    } catch (err: any) {
+      
+      setError(err.message);
+    
+    }
+    
   }
 
   return (
@@ -29,13 +42,13 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Email</Label>
               <Input
-                id="email"
+                id="username"
                 type="email"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>

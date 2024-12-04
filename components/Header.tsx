@@ -5,13 +5,16 @@ import { useTheme } from 'next-themes'
 import { useCart } from '@/lib/CartContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Moon, Sun, ShoppingCart, User } from 'lucide-react'
+import { Moon, Sun, ShoppingCart, User, LogOut } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useAuth } from "@/context/AuthProvider"
+
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const { cart } = useCart()
   const [mounted, setMounted] = useState(false)
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     setMounted(true)
@@ -28,7 +31,6 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold">NextShop</Link>
         <div className="flex items-center space-x-4">
-          <Input type="search" placeholder="Search products..." className="w-64" />
           <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
@@ -42,9 +44,26 @@ export default function Header() {
               )}
             </Button>
           </Link>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          {!isAuthenticated ? (
+            <Link href="/auth/login">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          ) : (
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              title="Logout"
+              className="flex items-center space-x-1"
+            >
+              <LogOut className="h-5 w-5" />
+              
+            </Button>
+          )}
+
         </div>
       </div>
     </header>
