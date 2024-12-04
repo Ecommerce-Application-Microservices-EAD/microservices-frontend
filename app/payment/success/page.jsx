@@ -4,6 +4,9 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
+const token = ""
+
+
 export default function PaymentSuccess({ searchParams }) {
   const { amount, paymentId, userId } = searchParams;
   const [error, setError] = useState(null);
@@ -11,9 +14,16 @@ export default function PaymentSuccess({ searchParams }) {
 
   const clearCart = async (userId) => {
     try {
-      const response = await axios.delete(`http://localhost:8085/api/v1/cart/clear`, {
-        params: { userId },
+      // const response = await axios.delete(`http://localhost:8085/api/v1/cart/clear`, {
+      //   params: { userId },
+      // });
+
+      const response = await axiosInstance.delete(`/cart/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       console.log(response.data); // Success message
     } catch (error) {
       setError(error.response?.data || 'Error clearing cart');
@@ -23,7 +33,14 @@ export default function PaymentSuccess({ searchParams }) {
 
   const updatePaymentStatus = async (paymentId) => {
     try {
-      const response = await axios.post(`http://localhost:8085/api/payments/${paymentId}/confirm`);
+      // const response = await axios.post(`http://localhost:8085/api/payments/${paymentId}/confirm`);
+
+      const response = await axiosInstance.post(`/payments/${paymentId}/confirm`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       console.log(response.data); // Success message
     } catch (error) {
       setError(error.response?.data || 'Error updating payment status');

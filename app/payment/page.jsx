@@ -8,6 +8,11 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import PropTypes from "prop-types";
 
+
+const token = ""
+
+
+
 const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
   ssr: false,
 });
@@ -34,14 +39,29 @@ const PaymentPage = () => {
     if (totalAmount > 0) {
       const fetchClientSecret = async () => {
         try {
-          const response = await axios.post(
-            "http://127.0.0.1:8085/api/payments/create",
+          // const response = await axios.post(
+          //   "http://127.0.0.1:8085/api/payments/create",
+          //   {
+          //     amount: totalAmount * 100,
+          //     currency: "usd",
+          //     userId,
+          //   }
+          // );
+
+          const response = await axiosInstance.post(
+            "/payments/create",
             {
               amount: totalAmount * 100,
               currency: "usd",
               userId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
           );
+          
           setClientSecret(response.data.clientSecret);
           setPaymentId(response.data.paymentId);
         } catch (error) {

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 const CartPage = () => {
   const [showProducts, setShowProducts] = useState(false);
-  const [userId] = useState(12345); // Hardcoded userId
+  const [userId] = useState("12345"); // Hardcoded userId
   const [totalAmount, setTotalAmount] = useState(0);
   const router = useRouter();
 

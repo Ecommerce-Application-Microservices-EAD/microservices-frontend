@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import axiosInstance from '@/lib/axiosConfig';
+
+
+const token = ""
+
 
 // Custom hook for fetching cart items
 const useCartItems = (userId) => {
@@ -9,8 +14,16 @@ const useCartItems = (userId) => {
 
   const fetchCartItems = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8085/api/v1/cart/${userId}`);
+      //const response = await axios.get(`http://127.0.0.1:8085/api/v1/cart/${userId}`);
+
+      const response = await axiosInstance.get(`/cart/${userId}`, {
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
+      });
+
       setCartItems(response.data.items || []);
+      
     } catch (error) {
       console.error('Error fetching cart items:', error);
       setCartItems([]); // Set to empty in case of error
@@ -57,9 +70,16 @@ const Cart = ({ userId, onTotalAmountChange }) => {
 
   const removeItemFromCart = async (productId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
-        params: { userId }
+      // await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
+      //   params: { userId }
+      // });
+
+      await axiosInstance.delete(`/cart/${userId}/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      
       fetchCartItems(); // Refresh cart items after removal
     } catch (error) {
       console.error('Error removing item from cart:', error.response.data);

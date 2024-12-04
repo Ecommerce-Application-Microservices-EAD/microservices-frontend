@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import axiosInstance from "@/lib/axiosConfig";
+
+const token = ""
+
 
 // Dummy products data
 const products = [
@@ -100,16 +104,29 @@ const ProductsGrid = ({userId}) => {
 
   const handleAdd = async (product, quantity) => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8085/api/v1/cart/add",
-        {
-          productId: product.id,
-          name: product.name,
-          quantity,
-          price: parseFloat(product.price.replace("$", "")),
-          userId,
-        }
-      );
+
+      const response = await axiosInstance.post(`/cart/${userId}`, {
+        productId: product.id,
+        name: product.name,
+        quantity,
+        price: parseFloat(product.price.replace("$", "")),
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // const response = await axios.post(
+      //   "http://127.0.0.1:8085/api/v1/cart/add",
+      //   {
+      //     productId: product.id,
+      //     name: product.name,
+      //     quantity,
+      //     price: parseFloat(product.price.replace("$", "")),
+      //     userId,
+      //   }
+      // );
+
       console.log(
         `Added ${quantity} of ${product.name} to cart.`,
         response.data
