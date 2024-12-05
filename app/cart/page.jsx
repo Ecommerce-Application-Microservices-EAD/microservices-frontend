@@ -5,8 +5,6 @@ import Cart from "./Cart";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
 
-
-
 const CartPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
@@ -37,37 +35,42 @@ const CartPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1A202C] to-[#2D3748] py-8">
-      <div className="w-full max-w-4xl bg-black shadow-xl rounded-lg p-8 md:p-10">
-        <h1 className="text-3xl font-semibold text-white mb-6 text-center">
-          Shopping Cart
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-[#1A202C] dark:via-[#2D3748] dark:to-[#4A5568] py-8">
+      <div className="w-full max-w-4xl bg-white dark:bg-black shadow-xl rounded-lg p-8 md:p-10">
+        <h1 className="text-3xl font-semibold text-gray-800 dark:text-white mb-6 text-center">
+          Your Cart
         </h1>
 
-        <div className="flex justify-center mb-6">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg"
-            onClick={handleAddMoreItemsClick}
-          >
-            Add more Items
-          </button>
-        </div>
+
 
         {showProducts ? (
           <ProductsGrid userId={userId} />
         ) : (
           <>
-            <div className="flex justify-center">
-              <Cart onTotalAmountChange={handleTotalAmount} onCartItemsChange={handleCartItemsChange} userId={userId} />
-            </div>
-            <div className="flex justify-center mt-6">
-              <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg"
-                onClick={handleCheckoutClick}
-              >
-                Check Out
-              </button>
-            </div>
-          </>
+          <div className="flex justify-center">
+            <Cart
+              onTotalAmountChange={handleTotalAmount}
+              onCartItemsChange={handleCartItemsChange}
+              userId={userId}
+            />
+          </div>
+          <div className="flex justify-end mt-6 gap-4 px-6">
+            <button
+              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              onClick={handleAddMoreItemsClick}
+            >
+              Add More Items
+            </button>
+        
+            <button
+              className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              onClick={handleCheckoutClick}
+            >
+              Check Out
+            </button>
+          </div>
+        </>
+        
         )}
       </div>
     </div>
