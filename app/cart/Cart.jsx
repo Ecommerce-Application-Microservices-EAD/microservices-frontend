@@ -1,44 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import axiosInstance from '@/lib/axiosConfig';
-
-const token = "";
-
-// Custom hook for fetching cart items
-const useCartItems = (userId, onCartItemsChange) => {
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchCartItems = async () => {
-    try {
-      const response = await axiosInstance.get(`/cart/${userId}`, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
-      });
-
-      const items = response.data.items || [];
-      setCartItems(items);
-      onCartItemsChange(items); // Notify parent component of cart items change
-    } catch (error) {
-      console.error('Error fetching cart items:', error);
-      setCartItems([]); // Set to empty in case of error
-      onCartItemsChange([]); // Notify parent component of cart items change
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCartItems();
-    const intervalId = setInterval(fetchCartItems, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
-  }, [userId]);
-
-  return { cartItems, loading, fetchCartItems };
-};
+import { removeItemFromCart } from '@/services/cartService';
+import useCartItems from '@/hooks/useCartItems';
 
 const CartItem = ({ item, onRemove }) => (
   <li className="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
@@ -64,19 +27,14 @@ CartItem.propTypes = {
 };
 
 const Cart = ({ userId, onTotalAmountChange, onCartItemsChange }) => {
-  const { cartItems, loading, fetchCartItems } = useCartItems(userId, onCartItemsChange);
+  const { cartItems, loading, fetchItems } = useCartItems(userId, onCartItemsChange);
 
-  const removeItemFromCart = async (productId) => {
+  const removeItem = async (productId) => {
     try {
-      await axiosInstance.delete(`/cart/${userId}/${productId}`, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
-      });
-      
-      fetchCartItems(); // Refresh cart items after removal
+      await removeItemFromCart(userId, productId); 
+      fetchItems();
     } catch (error) {
-      console.error('Error removing item from cart:', error.response.data);
+      console.error('Error removing item from cart:', error);
     }
   };
 
@@ -102,7 +60,7 @@ const Cart = ({ userId, onTotalAmountChange, onCartItemsChange }) => {
         <>
           <ul className="space-y-4">
             {cartItems.map((item) => (
-              <CartItem key={item.productId} item={item} onRemove={removeItemFromCart} />
+              <CartItem key={item.productId} item={item} onRemove={removeItem} />
             ))}
           </ul>
           <p className="mt-6 text-xl font-semibold text-white text-center">Total: ${roundedTotalAmount}</p>

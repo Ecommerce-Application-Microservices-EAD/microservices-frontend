@@ -4,16 +4,22 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getProductById } from "@/services/productService";
 import { Product } from "@/app/types/Product";
-import { useCart } from "@/lib/CartContext";
-import { AlertCircle, ShoppingCart } from "lucide-react";
+import { AlertCircle, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { addToCart } from "@/services/cartService";
+import { useAuth } from "@/context/AuthProvider";
+
+
 
 const ProductPage = () => {
+  const { user } = useAuth();
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const userId = user?.userId;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -37,6 +43,26 @@ const ProductPage = () => {
 
   const getImageFromBase64 = (base64String: string) => {
     return `data:image/png;base64,${base64String}`;
+  };
+
+  const handleAddToCart = async () => {
+    if (quantity < 1) return;
+
+    setIsLoading(true);
+    try {
+      const response = await addToCart(userId, product!, quantity);
+      console.log("Product added to cart:", response);
+      alert(`${quantity} ${product!.name}(s) have been added to your cart.`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add product to cart. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateQuantity = (amount: number) => {
+    setQuantity((prev) => Math.max(1, prev + amount)); 
   };
 
   if (error) {
@@ -84,7 +110,7 @@ const ProductPage = () => {
             alt={product.name}
             className="w-full md:w-1/3 h-auto object-contain rounded-md"
           />
-  
+
           <div className="flex flex-col w-full md:w-2/3 space-y-4">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{product.name}</h1>
             {product.category && (
@@ -104,20 +130,45 @@ const ProductPage = () => {
                 <strong>In Stock:</strong> This product is ready to ship. Get one now!
               </div>
             )}
-            <div className="flex items-center">
+
+            <div className="flex items-center mt-4">
+              <div
+                className={`flex items-center space-x-4 px-2 py-1 rounded-full ${'border border-gray-300 dark:border-gray-700'
+                  }`}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={product.stock === 0 || quantity <= 1}
+                  onClick={() => updateQuantity(-1)}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="text-lg">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={product.stock === 0 || quantity >= product.stock}
+                  onClick={() => updateQuantity(1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+
+
+            <div className="flex items-center mt-6">
               <p className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                 ${product.price}
               </p>
               <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addToCart(product.id);
-                }}
-                disabled={product.stock === 0}
                 className="flex items-center ml-10"
+                disabled={product.stock === 0 || isLoading}
+                onClick={handleAddToCart}
               >
                 <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
+                {isLoading ? "Adding..." : "Add to Cart"}
               </Button>
             </div>
           </div>
@@ -125,7 +176,6 @@ const ProductPage = () => {
       </div>
     </div>
   );
-  
 };
 
 export default ProductPage;
