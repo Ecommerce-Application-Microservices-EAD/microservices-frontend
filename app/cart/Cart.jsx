@@ -3,31 +3,28 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import axiosInstance from '@/lib/axiosConfig';
 
-
-const token = ""
-
+const token = "";
 
 // Custom hook for fetching cart items
-const useCartItems = (userId) => {
+const useCartItems = (userId, onCartItemsChange) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchCartItems = async () => {
     try {
-      //const response = await axios.get(`http://127.0.0.1:8085/api/v1/cart/${userId}`);
-
       const response = await axiosInstance.get(`/cart/${userId}`, {
         // headers: {
         //   Authorization: `Bearer ${token}`,
         // },
-      }
-    );
+      });
 
-      setCartItems(response.data.items || []);
-      
+      const items = response.data.items || [];
+      setCartItems(items);
+      onCartItemsChange(items); // Notify parent component of cart items change
     } catch (error) {
       console.error('Error fetching cart items:', error);
       setCartItems([]); // Set to empty in case of error
+      onCartItemsChange([]); // Notify parent component of cart items change
     } finally {
       setLoading(false);
     }
@@ -66,15 +63,11 @@ CartItem.propTypes = {
   onRemove: PropTypes.func.isRequired,
 };
 
-const Cart = ({ userId, onTotalAmountChange }) => {
-  const { cartItems, loading, fetchCartItems } = useCartItems(userId);
+const Cart = ({ userId, onTotalAmountChange, onCartItemsChange }) => {
+  const { cartItems, loading, fetchCartItems } = useCartItems(userId, onCartItemsChange);
 
   const removeItemFromCart = async (productId) => {
     try {
-      // await axios.delete(`http://127.0.0.1:8085/api/v1/cart/remove/${productId}`, {
-      //   params: { userId }
-      // });
-
       await axiosInstance.delete(`/cart/${userId}/${productId}`, {
         // headers: {
         //   Authorization: `Bearer ${token}`,
@@ -124,6 +117,7 @@ const Cart = ({ userId, onTotalAmountChange }) => {
 Cart.propTypes = {
   userId: PropTypes.string.isRequired,
   onTotalAmountChange: PropTypes.func.isRequired,
+  onCartItemsChange: PropTypes.func.isRequired,
 };
 
 export default Cart;

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import PropTypes from 'prop-types';
 
-const CheckoutForm = ({ totalAmount, paymentId, userId }) => {
+const CheckoutForm = ({ totalAmount, paymentId, userId, items }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const CheckoutForm = ({ totalAmount, paymentId, userId }) => {
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `http://localhost:3000/payment/success?amount=${totalAmount}&paymentId=${paymentId}&userId=${userId}`, // Redirect after successful payment
+          return_url: `http://localhost:3000/payment/success?amount=${totalAmount}&paymentId=${paymentId}&userId=${userId}&items=${encodeURIComponent(JSON.stringify(items))}`, // Redirect after successful payment
         },
       });
 
@@ -58,6 +58,14 @@ CheckoutForm.propTypes = {
   totalAmount: PropTypes.number.isRequired,
   paymentId: PropTypes.string.isRequired,
   userId: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      productId: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+      quantity: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };
 
 export default CheckoutForm;

@@ -5,14 +5,10 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import axios from "axios";
-import PropTypes from "prop-types";
 import axiosInstance from "@/lib/axiosConfig";
+import PropTypes from "prop-types";
 
-
-const token = ""
-
-
+const token = "";
 
 const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
   ssr: false,
@@ -24,6 +20,7 @@ const PaymentPage = () => {
   const searchParams = useSearchParams();
   const totalAmount = parseFloat(searchParams.get("amount"));
   const userId = searchParams.get("userId");
+  const items = JSON.parse(decodeURIComponent(searchParams.get("items")));
 
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
@@ -40,15 +37,6 @@ const PaymentPage = () => {
     if (totalAmount > 0) {
       const fetchClientSecret = async () => {
         try {
-          // const response = await axios.post(
-          //   "http://127.0.0.1:8085/api/payments/create",
-          //   {
-          //     amount: totalAmount * 100,
-          //     currency: "usd",
-          //     userId,
-          //   }
-          // );
-
           const response = await axiosInstance.post(
             "/payments/create",
             {
@@ -62,7 +50,7 @@ const PaymentPage = () => {
               // },
             }
           );
-          
+
           setClientSecret(response.data.clientSecret);
           setPaymentId(response.data.paymentId);
         } catch (error) {
@@ -101,6 +89,7 @@ const PaymentPage = () => {
                 totalAmount={totalAmount}
                 paymentId={paymentId}
                 userId={userId}
+                items={items}
               />
             </Elements>
           )
@@ -114,6 +103,14 @@ CheckoutForm.propTypes = {
   totalAmount: PropTypes.number.isRequired,
   paymentId: PropTypes.string.isRequired,
   userId: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      productId: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+      quantity: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };
 
 export default PaymentPage;

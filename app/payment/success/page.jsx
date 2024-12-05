@@ -5,20 +5,15 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-const token = ""
-
+const token = "";
 
 export default function PaymentSuccess({ searchParams }) {
-  const { amount, paymentId, userId } = searchParams;
+  const { amount, paymentId, userId, items } = searchParams;
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const clearCart = async (userId) => {
     try {
-      // const response = await axios.delete(`http://localhost:8085/api/v1/cart/clear`, {
-      //   params: { userId },
-      // });
-
       const response = await axiosInstance.delete(`/cart/${userId}`, {
         // headers: {
         //   Authorization: `Bearer ${token}`,
@@ -34,8 +29,6 @@ export default function PaymentSuccess({ searchParams }) {
 
   const updatePaymentStatus = async (paymentId) => {
     try {
-      // const response = await axios.post(`http://localhost:8085/api/payments/${paymentId}/confirm`);
-
       const response = await axiosInstance.post(`/payments/${paymentId}/confirm`, {}, {
         // headers: {
         //   Authorization: `Bearer ${token}`,
@@ -46,6 +39,24 @@ export default function PaymentSuccess({ searchParams }) {
     } catch (error) {
       setError(error.response?.data || 'Error updating payment status');
       console.error('Error updating payment status:', error.response?.data || error.message); // Error message
+    }
+  };
+
+  const placeOrder = async (orderDetails) => {
+    try {
+      console.log('Order details:', orderDetails);
+      const response = await axiosInstance.post('/orders', orderDetails, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Authorization: `Bearer ${token}`, // Uncomment if authorization is needed
+        },
+      });
+
+      console.log(response.data); // Success message
+      // Handle success (e.g., navigate to order confirmation page, clear cart, etc.)
+    } catch (error) {
+      setError(error.message + ' : Error placing order');
+      console.error('Error placing order:', error.response?.data || error.message); // Error message
     }
   };
 
@@ -64,6 +75,22 @@ export default function PaymentSuccess({ searchParams }) {
       updatePaymentStatus(paymentId).finally(() => setLoading(false));
     }
   }, [paymentId, userId]);
+
+  useEffect(() => {
+    if (paymentId) {
+      setLoading(true);
+      const orderDetails = {
+        // paymentId,
+        items: JSON.parse(decodeURIComponent(items)),
+        totalAmount: Number(amount),
+        userId,
+        status: 'placed',
+        shippingAddress: '123 Main St, Anytown, USA',
+      };
+      console.log('Order details being sent:', orderDetails);
+      placeOrder(orderDetails).finally(() => setLoading(false));
+    }
+  }, [paymentId, amount, userId, items]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-gray-800 to-gray-900 p-6">
@@ -104,5 +131,6 @@ PaymentSuccess.propTypes = {
     amount: PropTypes.string.isRequired,
     paymentId: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
+    items: PropTypes.string.isRequired,
   }).isRequired,
 };

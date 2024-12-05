@@ -6,22 +6,24 @@ import Cart from "./Cart";
 import { useRouter } from "next/navigation";
 
 const CartPage = () => {
-  const [showProducts, setShowProducts] = useState(false);
-  const [userId] = useState("12345"); // Hardcoded userId
   const [totalAmount, setTotalAmount] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
+  const [showProducts, setShowProducts] = useState(false);
+  const userId = 'user123'; // Replace with actual userId
   const router = useRouter();
-
-  const handleSeeProductsClick = () => {
-    setShowProducts(!showProducts);
-  };
 
   const handleTotalAmount = (amount) => {
     setTotalAmount(amount);
   };
 
+  const handleCartItemsChange = (items) => {
+    setCartItems(items);
+  };
+
   const handleCheckoutClick = () => {
     if (totalAmount > 0) {
-      router.push(`/payment?amount=${totalAmount}&userId=${userId}`);
+      const cartItemsString = encodeURIComponent(JSON.stringify(cartItems));
+      router.push(`/payment?amount=${totalAmount}&userId=${userId}&items=${cartItemsString}`);
     } else {
       alert("Please add products to your cart first!");
     }
@@ -37,7 +39,7 @@ const CartPage = () => {
         <div className="flex justify-center mb-6">
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg"
-            onClick={handleSeeProductsClick}
+            onClick={() => setShowProducts(!showProducts)}
           >
             {showProducts ? "Hide Products" : "Add more Items"}
           </button>
@@ -48,7 +50,7 @@ const CartPage = () => {
         ) : (
           <>
             <div className="flex justify-center">
-              <Cart onTotalAmountChange={handleTotalAmount} userId={userId} />
+              <Cart onTotalAmountChange={handleTotalAmount} onCartItemsChange={handleCartItemsChange} userId={userId} />
             </div>
             <div className="flex justify-center mt-6">
               <button
