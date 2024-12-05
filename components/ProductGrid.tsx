@@ -3,10 +3,9 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, AlertCircle } from "lucide-react";
 import { Product } from "@/app/types/Product";
 import { getAllProducts } from "@/services/productService";
-import { AlertCircle } from "lucide-react";
 
 export default function ProductGrid({ products }: { products: Product[] | null }) {
   const [localProducts, setLocalProducts] = useState<Product[]>([]);
@@ -70,14 +69,18 @@ export default function ProductGrid({ products }: { products: Product[] | null }
             <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{product.name}</h3>
             <p className="text-xl font-bold text-gray-900 dark:text-gray-100">${product.price}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400">{product.category}</p>
+            {product.stock === 0 && (
+              <p className="text-sm text-red-600 dark:text-red-400 font-semibold mt-2">Out of Stock</p>
+            )}
           </CardContent>
           <CardFooter className="mt-auto">
             <Button
               className="w-full"
               onClick={(e) => {
-                e.stopPropagation(); 
-                addToCart(product.id); 
+                e.stopPropagation();
+                addToCart(product.id);
               }}
+              disabled={product.stock === 0}
             >
               <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
             </Button>
