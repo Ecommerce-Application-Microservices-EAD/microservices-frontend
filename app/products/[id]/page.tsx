@@ -96,12 +96,12 @@ const ProductPage = () => {
             {product.stock === 0 ? (
               <div className="px-4 py-3 bg-red-50 dark:bg-red-900/50 text-sm text-red-700 dark:text-red-300 rounded-lg flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
-                <strong>Out of Stock:</strong> This product is currently unavailable.
+                <strong>Out of Stock:</strong> This product is currently unavailable. Check back later!
               </div>
             ) : (
               <div className="px-4 py-3 bg-green-100 dark:bg-green-900 text-sm text-green-700 dark:text-green-400 rounded-lg flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <strong>In Stock:</strong> This product is ready to ship.
+                <strong>In Stock:</strong> This product is ready to ship. Get one now!
               </div>
             )}
             <div className="flex items-center">
