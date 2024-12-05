@@ -1,11 +1,8 @@
 'use client';
 
 import axiosInstance from '@/lib/axiosConfig';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-
-const token = "";
 
 export default function PaymentSuccess({ searchParams }) {
   const { amount, paymentId, userId, items } = searchParams;
@@ -14,31 +11,28 @@ export default function PaymentSuccess({ searchParams }) {
 
   const clearCart = async (userId) => {
     try {
-      const response = await axiosInstance.delete(`/cart/${userId}`, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
-      });
-
+      const response = await axiosInstance.delete(`/cart/${userId}`);
       console.log(response.data); // Success message
     } catch (error) {
-      setError(error.response?.data || 'Error clearing cart');
-      console.error('Error clearing cart:', error.response?.data || error.message); // Error message
+      handleError(error, 'Error clearing cart');
     }
   };
 
   const updatePaymentStatus = async (paymentId) => {
     try {
-      const response = await axiosInstance.post(`/payments/${paymentId}/confirm`, {}, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
-      });
-
+      const response = await axiosInstance.post(`/payments/${paymentId}/confirm`);
       console.log(response.data); // Success message
     } catch (error) {
-      setError(error.response?.data || 'Error updating payment status');
-      console.error('Error updating payment status:', error.response?.data || error.message); // Error message
+      handleError(error, 'Error updating payment status');
+    }
+  };
+
+  const reduceProductStock = async (productId, count) => {
+    try {
+      const response = await axiosInstance.post(`/products/${productId}/reduce-quantity?count=${count}`);
+      console.log(response.data); // Success message for reducing stock
+    } catch (error) {
+      handleError(error, 'Error reducing product stock');
     }
   };
 
@@ -48,16 +42,24 @@ export default function PaymentSuccess({ searchParams }) {
       const response = await axiosInstance.post('/orders', orderDetails, {
         headers: {
           'Content-Type': 'application/json',
-          // Authorization: `Bearer ${token}`, // Uncomment if authorization is needed
         },
       });
 
       console.log(response.data); // Success message
-      // Handle success (e.g., navigate to order confirmation page, clear cart, etc.)
+
+      // Reduce stock for each item in the order
+      const reduceStockPromises = orderDetails.items.map(item => 
+        reduceProductStock(item.productId, item.count)
+      );
+      await Promise.all(reduceStockPromises);
     } catch (error) {
-      setError(error.message + ' : Error placing order');
-      console.error('Error placing order:', error.response?.data || error.message); // Error message
+      handleError(error, 'Error placing order');
     }
+  };
+
+  const handleError = (error, defaultMessage) => {
+    setError(error.response?.data || defaultMessage);
+    console.error(defaultMessage, error.response?.data || error.message); // Error message
   };
 
   useEffect(() => {
@@ -74,13 +76,12 @@ export default function PaymentSuccess({ searchParams }) {
       setLoading(true);
       updatePaymentStatus(paymentId).finally(() => setLoading(false));
     }
-  }, [paymentId, userId]);
+  }, [paymentId]);
 
   useEffect(() => {
     if (paymentId) {
       setLoading(true);
       const orderDetails = {
-        // paymentId,
         items: JSON.parse(decodeURIComponent(items)),
         totalAmount: Number(amount),
         userId,

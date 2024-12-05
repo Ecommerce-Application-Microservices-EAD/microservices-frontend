@@ -32,10 +32,7 @@ export default function Orders({ userId="12345" }) {
   }, [userId]);
 
   const handleOrderClick = (order) => {
-    router.push({
-      pathname: `/orders/${order.id}`,
-      query: { order: JSON.stringify(order) },
-    });
+    router.push(`/orders/${order.orderId}?order=${encodeURIComponent(JSON.stringify(order))}`);
   };
 
   if (loading) {
@@ -53,13 +50,14 @@ export default function Orders({ userId="12345" }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {orders.map((order) => (
             <div
-              key={order.id}
+              key={order.orderId}
               className="bg-white p-4 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100"
               onClick={() => handleOrderClick(order)}
             >
-              <h2 className="text-xl font-semibold mb-2">Order #{order.id}</h2>
+              <h2 className="text-xl text-black font-semibold mb-2">Order #{order.orderId}</h2>
               <p className="text-gray-700">Total Amount: ${order.totalAmount}</p>
-              <p className="text-gray-700">Date: {new Date(order.date).toLocaleDateString()}</p>
+              <p className="text-gray-700">Date: {new Date(order.createdDate).toLocaleString()}</p>
+              <p className="text-gray-700">Status: {order.status}</p>
             </div>
           ))}
         </div>
