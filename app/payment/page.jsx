@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import PropTypes from "prop-types";
+import axiosInstance from "@/lib/axiosConfig";
 
 
 const token = ""
@@ -56,9 +57,9 @@ const PaymentPage = () => {
               userId,
             },
             {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              // headers: {
+              //   Authorization: `Bearer ${token}`,
+              // },
             }
           );
           

@@ -111,9 +111,9 @@ const ProductsGrid = ({userId}) => {
         quantity,
         price: parseFloat(product.price.replace("$", "")),
       }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
 
       // const response = await axios.post(

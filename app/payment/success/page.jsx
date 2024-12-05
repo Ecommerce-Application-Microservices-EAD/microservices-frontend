@@ -1,5 +1,6 @@
 'use client';
 
+import axiosInstance from '@/lib/axiosConfig';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -19,9 +20,9 @@ export default function PaymentSuccess({ searchParams }) {
       // });
 
       const response = await axiosInstance.delete(`/cart/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
 
       console.log(response.data); // Success message
@@ -36,9 +37,9 @@ export default function PaymentSuccess({ searchParams }) {
       // const response = await axios.post(`http://localhost:8085/api/payments/${paymentId}/confirm`);
 
       const response = await axiosInstance.post(`/payments/${paymentId}/confirm`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
 
       console.log(response.data); // Success message

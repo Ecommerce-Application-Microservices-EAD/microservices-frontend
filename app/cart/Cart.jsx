@@ -20,7 +20,8 @@ const useCartItems = (userId) => {
         // headers: {
         //   Authorization: `Bearer ${token}`,
         // },
-      });
+      }
+    );
 
       setCartItems(response.data.items || []);
       
@@ -75,9 +76,9 @@ const Cart = ({ userId, onTotalAmountChange }) => {
       // });
 
       await axiosInstance.delete(`/cart/${userId}/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
       
       fetchCartItems(); // Refresh cart items after removal
