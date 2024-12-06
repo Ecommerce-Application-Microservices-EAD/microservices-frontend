@@ -6,18 +6,26 @@ import { Button } from "@/components/ui/button";
 import { sampleDataOrder } from "@/lib/sampleDataOrder";
 
 export default function MyOrderPage() {
-  const [orders] = useState(sampleDataOrder); 
-  const [selectedOrder, setSelectedOrder] = useState(null); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const userId = 1; 
+  const [orders, setOrders] = useState(sampleDataOrder);
+  const [selectedOrder, setSelectedOrder] = useState({
+    product: { name: "N/A", price: 0, skuCode: "N/A" },
+    quantity: 0,
+    status: "Unknown",
+  }); 
 
-  // Fetch orders by user ID
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
+
+  // Retrieve the logged-in userId here (Username)
+  const userId = 1;
+
+  // Fetch orders by userId
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`/api/v1/order/user/${userId}`);
+        const response = await fetch(`http://localhost:8081/api/v1/order/user/${userId}`);
         const data = await response.json();
-        // setOrders(data); 
+        setOrders(data);
       } catch (error) {
         console.error("Failed to fetch orders", error);
       }
@@ -39,16 +47,35 @@ export default function MyOrderPage() {
     }
   };
 
-  // Fetch order details by ID
-  const fetchOrderDetails = async (orderId) => {
+  // Fetch order details by orderId 
+  const fetchOrderDetails = async (orderId, event) => {
     try {
-      const response = await fetch(`/api/v1/order/${orderId}`);
-      const data = await response.json();
-      setSelectedOrder(data); 
-      setIsModalOpen(true); 
+      
+      const rect = event.target.getBoundingClientRect();
+      setPopoverPosition({ x: rect.x + rect.width / 2, y: rect.y + rect.height });
+
+      
+      setIsPopoverOpen(true);
+
+      const response = await fetch(`http://localhost:8081/api/v1/order/${orderId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedOrder(data);
+      } else {
+        console.error("Order not found. Using default data.");
+      }
     } catch (error) {
-      console.error("Failed to fetch order details", error);
+      console.error("Failed to fetch order details. Using default data.", error);
     }
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+    setSelectedOrder({
+      product: { name: "N/A", price: 0, skuCode: "N/A" },
+      quantity: 0,
+      status: "Unknown",
+    }); 
   };
 
   return (
@@ -62,15 +89,15 @@ export default function MyOrderPage() {
                 <div className="flex gap-3">
                   <img
                     src={order.product.image}
-                    alt={order.product.name}
+                    alt={order.product.skuCode}
                     className="w-20 h-20 object-cover rounded-md mb-4"
                   />
-                  <h3 className="text font-bold">{order.product.name}</h3>
+                  <h3 className="text font-bold">{order.product.skuCode}</h3>
                 </div>
                 <p>${order.product.price.toFixed(2)}</p>
                 <p className={getStatusColor(order.status)}>{order.status}</p>
                 <div className="flex gap-2">
-                  <Button onClick={() => fetchOrderDetails(order.id)}>View Details</Button>
+                  <Button onClick={(e) => fetchOrderDetails(order.id, e)}>View Details</Button>
                 </div>
               </CardContent>
             </Card>
@@ -80,24 +107,36 @@ export default function MyOrderPage() {
         )}
       </div>
 
-      {/* Modal for Order Details */}
-      {isModalOpen && selectedOrder && (
+      {/* Popover for Order Details */}
+      {isPopoverOpen && (
         <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50"
-          onClick={() => setIsModalOpen(false)} 
+          className="fixed inset-0 flex justify-center items-center z-50"
+          onClick={closePopover}
         >
           <div
-            className="bg-white rounded-lg p-5 w-96"
-            onClick={(e) => e.stopPropagation()} 
+            className="absolute bg-white shadow-lg rounded-lg p-5 w-80"
+            style={{
+              top: popoverPosition.y + 10,
+              left: popoverPosition.x - 160,
+              zIndex: 1000,
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Order Details</h2>
-            <p><strong>Product Name:</strong> {selectedOrder.product.name}</p>
-            <p><strong>Price:</strong> ${selectedOrder.product.price.toFixed(2)}</p>
-            <p><strong>Quantity:</strong> {selectedOrder.quantity}</p>
-            <p><strong>Status:</strong> {selectedOrder.status}</p>
-            <p><strong>Address:</strong> {selectedOrder.shippingAddress}</p>
+            <p>
+              <strong>Product Name:</strong> {selectedOrder.product.name}
+            </p>
+            <p>
+              <strong>Price:</strong> ${selectedOrder.product.price.toFixed(2)}
+            </p>
+            <p>
+              <strong>Quantity:</strong> {selectedOrder.quantity}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedOrder.status}
+            </p>
             <div className="flex justify-end mt-4">
-              <Button onClick={() => setIsModalOpen(false)}>Close</Button>
+              <Button onClick={closePopover}>Close</Button>
             </div>
           </div>
         </div>

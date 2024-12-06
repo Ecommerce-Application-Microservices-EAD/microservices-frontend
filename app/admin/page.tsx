@@ -19,6 +19,9 @@ const initialProducts = [
 export default function AdminPage() {
   const [products, setProducts] = useState(initialProducts)
   const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '' })
+  const [orders, setOrders] = useState([])
+  const [showOrders, setShowOrders] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleAddProduct = (e: { preventDefault: () => void }) => {
     e.preventDefault()
@@ -36,10 +39,41 @@ export default function AdminPage() {
     setProducts(products.filter(product => product.id !== id))
   }
 
+  const fetchOrders = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('http://localhost:8081/api/v1/order')
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+      const data = await response.json()
+      setOrders(data)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleViewOrders = () => {
+    fetchOrders()
+    setShowOrders(true)
+  }
+
+  const closeOrders = () => {
+    setShowOrders(false)
+    setOrders([])
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      
+      <div className='flex justify-between'>
+         <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+         <Button onClick={handleViewOrders}>
+             View Orders
+         </Button>
+      </div>
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Add New Product</CardTitle>
@@ -105,6 +139,45 @@ export default function AdminPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {showOrders && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 w-full max-w-4xl">
+            <h2 className="text-2xl font-bold mb-4">Orders</h2>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order Number</TableHead>
+                    <TableHead>User ID</TableHead>
+                    <TableHead>SKU Code</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order: any) => (
+                    <TableRow key={order.id}>
+                      <TableCell>{order.orderNumber}</TableCell>
+                      <TableCell>{order.userId}</TableCell>
+                      <TableCell>{order.skuCode}</TableCell>
+                      <TableCell>${order.price}</TableCell>
+                      <TableCell>{order.quantity}</TableCell>
+                      <TableCell>{order.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            <Button onClick={closeOrders} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
