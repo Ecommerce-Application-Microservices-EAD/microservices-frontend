@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosConfig';
+import { useAuth } from '@/context/AuthProvider';
 
-export default function Orders({ userId="12345" }) {
+
+export default function Orders({  userId= useAuth().user?.userId || "12345" }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
