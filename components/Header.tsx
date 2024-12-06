@@ -1,54 +1,66 @@
-"use client"
-
-import Link from 'next/link'
-import { useTheme } from 'next-themes'
-import { useCart } from '@/lib/CartContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Moon, Sun, ShoppingCart, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
-
+'use client';
+import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useAuth } from '@/context/AuthProvider';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart, User, LogOut, Moon, Sun } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Header() {
-  const { theme, setTheme } = useTheme()
-  const { cart } = useCart()
-  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
-    return null
+    return null;
   }
-
-  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0)
 
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold">NextShop</Link>
+        <Link href="/" className="text-2xl font-bold">
+          NextShop
+        </Link>
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </Button>
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  {cartItemsCount}
-                </span>
-              )}
             </Button>
           </Link>
-          <Link href="/profile">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+          {!isAuthenticated ? (
+            <Link href="/auth/login">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              title="Logout"
+              className="flex items-center space-x-1"
+            >
+              <LogOut className="h-5 w-5" />
             </Button>
-          </Link>
+          )}
         </div>
       </div>
     </header>
-  )
+  );
 }

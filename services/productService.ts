@@ -1,8 +1,7 @@
 import axiosInstance from '@/lib/axiosConfig';
 import { Product } from '@/app/types/Product';
 
-//using hardcoded jwt token for now
-const token = ""
+const token = localStorage.getItem("jwtToken");
 
 export const getAllProducts = async () => {
   try {

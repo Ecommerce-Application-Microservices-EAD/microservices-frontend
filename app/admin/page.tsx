@@ -8,7 +8,8 @@ import { UpdateProductForm } from "@/components/Forms/updateProductForm";
 import { Modal } from "@/components/modal";
 import SearchBar from "@/components/searchBar";
 import { toast } from "@/components/Toast";
-import { Product } from "../types/Product"
+import { Product } from "../types/Product";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function AdminPage() {
   const {
@@ -29,6 +30,7 @@ export default function AdminPage() {
   const displayedProducts = searchResults || products;
 
   return (
+  <ProtectedRoute allowedRoles={["ADMIN"]}>
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
         Admin Dashboard
@@ -122,5 +124,6 @@ export default function AdminPage() {
         </Modal>
       )}
     </div>
+  </ProtectedRoute>
   );
 }

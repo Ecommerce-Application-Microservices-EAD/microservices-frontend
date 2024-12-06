@@ -41,7 +41,14 @@ export const ProductTable = ({ products, onUpdate, onDelete }: ProductTableProps
                 <td className="px-6 py-4 font-medium">{product.name}</td>
                 <td className="px-6 py-4">{product.description}</td>
                 <td className="px-6 py-4 font-semibold text-green-600 dark:text-green-400">${product.price}</td>
-                <td className="px-6 py-4">{product.stock}</td>
+                <td className="px-6 py-4">
+                  {product.stock > 0 ? (
+                    product.stock
+                  ) : (
+                    <span className="text-red-600 dark:text-red-400 font-semibold">Empty</span>
+                  )}
+                </td>
+
                 <td className="px-6 py-4 capitalize">{product.category}</td>
                 <td className="px-6 py-4 flex justify-center gap-2">
                   <Button
