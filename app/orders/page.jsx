@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axiosConfig';
 import { useAuth } from '@/context/AuthProvider';
 
+const token = localStorage.getItem('jwtToken');
 
-export default function Orders({  userId= useAuth().user?.userId || "12345" }) {
+
+export default function Orders({  userId= useAuth().user?.sub }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,9 +18,9 @@ export default function Orders({  userId= useAuth().user?.userId || "12345" }) {
     const fetchOrders = async () => {
       try {
         const response = await axiosInstance.get(`/orders/user/${userId}`, {
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
         console.log('Orders:', response.data);
         setOrders(response.data);

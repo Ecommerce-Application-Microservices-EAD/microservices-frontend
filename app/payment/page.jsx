@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axiosConfig";
 import PropTypes from "prop-types";
 
-const token = "";
+const token = localStorage.getItem("jwtToken");
 
 const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
   ssr: false,
@@ -45,9 +45,9 @@ const PaymentPage = () => {
               userId,
             },
             {
-              // headers: {
-              //   Authorization: `Bearer ${token}`,
-              // },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
           );
 

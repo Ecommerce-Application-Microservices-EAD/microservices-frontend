@@ -9,8 +9,10 @@ const CartPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [showProducts, setShowProducts] = useState(false);
+  
   const { user } = useAuth();
-  const userId = user?.userId;
+  const userId = user?.sub
+
   const router = useRouter();
 
   const handleTotalAmount = (amount) => {

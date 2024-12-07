@@ -1,17 +1,54 @@
 'use client';
 
 import axiosInstance from '@/lib/axiosConfig';
+import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
+
+const token = localStorage.getItem("jwtToken");
+
 
 export default function PaymentSuccess({ searchParams }) {
   const { amount, paymentId, userId, items } = searchParams;
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  
+
+  useEffect(() => {
+    if (performance.navigation.type === 1) {
+      router.replace('/');
+      return;
+    }
+
+    if (paymentId) {
+      setLoading(true);
+      clearCart(userId).finally(() => setLoading(false));
+      updatePaymentStatus(paymentId).finally(() => setLoading(false));
+      const orderDetails = {
+        items: JSON.parse(decodeURIComponent(items)),
+        totalAmount: Number(amount),
+        userId,
+        status: 'placed',
+        shippingAddress: '123 Main St, Anytown, USA',
+      };
+      console.log('Order details being sent:', orderDetails);
+      placeOrder(orderDetails).finally(() => setLoading(false));
+    } else {
+      setError('Payment ID not found in URL');
+    }
+  }, [paymentId, userId, amount, items]);
 
   const clearCart = async (userId) => {
     try {
-      const response = await axiosInstance.delete(`/cart/${userId}`);
+      const response = await axiosInstance.delete(`/cart/${userId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data); // Success message
     } catch (error) {
       handleError(error, 'Error clearing cart');
@@ -20,7 +57,14 @@ export default function PaymentSuccess({ searchParams }) {
 
   const updatePaymentStatus = async (paymentId) => {
     try {
-      const response = await axiosInstance.post(`/payments/${paymentId}/confirm`);
+      const response = await axiosInstance.post(`/payments/${paymentId}/confirm`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data); // Success message
     } catch (error) {
       handleError(error, 'Error updating payment status');
@@ -29,7 +73,13 @@ export default function PaymentSuccess({ searchParams }) {
 
   const reduceProductStock = async (productId, count) => {
     try {
-      const response = await axiosInstance.post(`/products/${productId}/reduce-quantity?count=${count}`);
+      const response = await axiosInstance.patch(`/products/${productId}/reduce-quantity?count=${count}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data); // Success message for reducing stock
     } catch (error) {
       handleError(error, 'Error reducing product stock');
@@ -42,6 +92,7 @@ export default function PaymentSuccess({ searchParams }) {
       const response = await axiosInstance.post('/orders', orderDetails, {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -49,7 +100,8 @@ export default function PaymentSuccess({ searchParams }) {
 
       // Reduce stock for each item in the order
       const reduceStockPromises = orderDetails.items.map(item => 
-        reduceProductStock(item.productId, item.count)
+        console.log('Reducing stock for item:', item) ||
+        reduceProductStock(item.productId, item.quantity)
       );
       await Promise.all(reduceStockPromises);
     } catch (error) {
@@ -61,37 +113,6 @@ export default function PaymentSuccess({ searchParams }) {
     setError(error.response?.data || defaultMessage);
     console.error(defaultMessage, error.response?.data || error.message); // Error message
   };
-
-  useEffect(() => {
-    if (paymentId) {
-      setLoading(true);
-      clearCart(userId).finally(() => setLoading(false));
-    } else {
-      setError('Payment ID not found in URL');
-    }
-  }, [paymentId, userId]);
-
-  useEffect(() => {
-    if (paymentId) {
-      setLoading(true);
-      updatePaymentStatus(paymentId).finally(() => setLoading(false));
-    }
-  }, [paymentId]);
-
-  useEffect(() => {
-    if (paymentId) {
-      setLoading(true);
-      const orderDetails = {
-        items: JSON.parse(decodeURIComponent(items)),
-        totalAmount: Number(amount),
-        userId,
-        status: 'placed',
-        shippingAddress: '123 Main St, Anytown, USA',
-      };
-      console.log('Order details being sent:', orderDetails);
-      placeOrder(orderDetails).finally(() => setLoading(false));
-    }
-  }, [paymentId, amount, userId, items]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-gray-800 to-gray-900 p-6">

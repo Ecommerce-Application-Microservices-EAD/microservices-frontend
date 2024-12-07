@@ -1,12 +1,20 @@
 import axiosInstance from "@/lib/axiosConfig";
 
+const token = localStorage.getItem("jwtToken");
+
 export const addToCart = async (userId, product, quantity) => {
   try {
+    console.log("userId cartService/addtoCart", userId);
     const response = await axiosInstance.post(`/cart/${userId}`, {
       productId: product.id,
       name: product.name,
       quantity,
       price: parseFloat(product.price),
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
@@ -16,13 +24,12 @@ export const addToCart = async (userId, product, quantity) => {
 };
 
 
-const token = localStorage.getItem("jwtToken");
 export const fetchCartItems = async (userId) => {
   try {
     const response = await axiosInstance.get(`/cart/${userId}`, {
-      // headers: {
-      //   Authorization: `Bearer ${token}`,
-      // },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data.items || [];
   } catch (error) {
@@ -34,9 +41,9 @@ export const fetchCartItems = async (userId) => {
 export const removeItemFromCart = async (userId, productId) => {
   try {
     await axiosInstance.delete(`/cart/${userId}/${productId}`, {
-      // headers: {
-      //   Authorization: `Bearer ${token}`,
-      // },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   } catch (error) {
     console.error('Error removing item from cart:', error.response?.data || error);

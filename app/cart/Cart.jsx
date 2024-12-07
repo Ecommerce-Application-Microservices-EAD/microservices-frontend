@@ -33,6 +33,7 @@ CartItem.propTypes = {
 };
 
 const Cart = ({ userId, onTotalAmountChange, onCartItemsChange }) => {
+
   const { cartItems, loading, fetchItems } = useCartItems(userId, onCartItemsChange);
 
   const removeItem = async (productId) => {

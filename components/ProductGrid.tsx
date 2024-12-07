@@ -14,7 +14,7 @@ export default function ProductGrid({ products }: { products: Product[] | null }
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
   const { user } = useAuth();
-  const userId = user?.userId;
+  const userId = user?.sub;
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
 
@@ -57,7 +57,7 @@ export default function ProductGrid({ products }: { products: Product[] | null }
     setIsLoading(true);
     try {
       const response = await addToCart(userId, product, quantity);
-      console.log("Product added to cart:", response);
+      console.log(`Product added to cart of ${userId} :`, response);
       alert(`${quantity} ${product.name}(s) have been added to your cart.`);
     } catch (err) {
       console.error(err);
