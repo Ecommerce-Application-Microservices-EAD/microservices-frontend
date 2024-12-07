@@ -8,16 +8,39 @@ import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 
 export default function SignupPage() {
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
-    // TODO: Implement actual signup logic
-    console.log('Signup attempt:', { name, email, password })
-    router.push('/')
+
+    const body = {
+      username,  // setting username from state
+      password,
+      role: 'USER' // setting role to USER as required
+    }
+
+    try {
+      const response = await fetch('http://localhost:9000/api/user/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+
+      if (response.ok) {
+        console.log('Signup successful')
+        router.push('/')
+      } else {
+        console.error('Signup failed', response.statusText)
+        // Optionally handle error response
+      }
+    } catch (error) {
+      console.error('Error during signup:', error)
+    }
   }
 
   return (
@@ -30,13 +53,13 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="name"
+                id="username"
                 type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder="JohnDoe"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
