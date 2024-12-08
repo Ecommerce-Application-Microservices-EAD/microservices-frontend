@@ -7,14 +7,12 @@ import { useEffect, useState } from 'react';
 
 const token = localStorage.getItem("jwtToken");
 
-
 export default function PaymentSuccess({ searchParams }) {
   const { amount, paymentId, userId, items } = searchParams;
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   
-
   useEffect(() => {
     if (performance.navigation.type === 1) {
       router.replace('/');

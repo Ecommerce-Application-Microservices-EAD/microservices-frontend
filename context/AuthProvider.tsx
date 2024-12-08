@@ -18,32 +18,37 @@ type AuthContextType = {
 // Create the AuthContext
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true); // Loading state to track initialization
   const router = useRouter();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("jwtToken");
+    const storedToken =
+      typeof window !== "undefined" ? localStorage.getItem("jwtToken") : null;
 
     if (storedToken) {
       const decodedToken = decode(storedToken);
 
-      if ( decodedToken && typeof decodedToken === "object" && "exp" in decodedToken && typeof decodedToken.exp === "number" && !isTokenExpired(decodedToken.exp)) 
-        {
-          setToken(storedToken);
-          setUser(decodedToken);
-        } 
-        else 
-        {
-          console.warn("Token expired or invalid");
-          localStorage.removeItem("jwtToken");
-        }
+      if (
+        decodedToken &&
+        typeof decodedToken === "object" &&
+        "exp" in decodedToken &&
+        typeof decodedToken.exp === "number" &&
+        !isTokenExpired(decodedToken.exp)
+      ) {
+        setToken(storedToken);
+        setUser(decodedToken);
+      } else {
+        console.warn("Token expired or invalid");
+        localStorage.removeItem("jwtToken");
+      }
     }
 
-    setLoading(false); 
-    
+    setLoading(false);
   }, []);
 
   const isTokenExpired = (exp: number): boolean => {
@@ -52,23 +57,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.post("http://localhost:9000/api/user/login", { username, password });
-      const receivedToken = response.data;
-      console.log('receivedToken', receivedToken);
+      const response = await axios.post(
+        "http://localhost:9000/api/user/login",
+        { username, password }
+      );
+      const receivedToken = response.data; // Ensure the API returns the token string
 
       if (receivedToken) {
         setToken(receivedToken);
         const decodedToken: any = decode(receivedToken);
         setUser(decodedToken);
-        localStorage.setItem("jwtToken", receivedToken);
+        localStorage.setItem("jwtToken", receivedToken); // Store the token
 
-        if (decodedToken?.role === 'ADMIN') {
+        // Redirect based on user role
+        if (decodedToken?.role === "ADMIN") {
           router.push("/admin");
-        } else if (decodedToken?.role === 'USER') {
+        } else if (decodedToken?.role === "USER") {
           router.push("/");
         }
       }
-      
     } catch (error: any) {
       console.error("Login failed:", error.response?.data || error.message);
       throw new Error(error.response?.data?.message || "Login failed");
@@ -78,8 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("jwtToken");
-    router.push("/");
+    localStorage.removeItem("jwtToken"); // Remove token from localStorage
+    router.push("/"); // Redirect to home page
   };
 
   const getRole = (): string | null => {
@@ -87,15 +94,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user.role || null;
   };
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!token; // Boolean indicating if the user is authenticated
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, getRole, loading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, isAuthenticated, getRole, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

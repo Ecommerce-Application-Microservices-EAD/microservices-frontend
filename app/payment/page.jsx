@@ -8,13 +8,19 @@ import { useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axiosConfig";
 import PropTypes from "prop-types";
 
-const token = localStorage.getItem("jwtToken");
-
 const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
   ssr: false,
 });
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+
+// Helper function to safely access localStorage
+const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("jwtToken");
+  }
+  return null;
+};
 
 const PaymentPage = () => {
   const searchParams = useSearchParams();
@@ -37,6 +43,13 @@ const PaymentPage = () => {
     if (totalAmount > 0) {
       const fetchClientSecret = async () => {
         try {
+          const token = getToken(); // Safely get the token
+          if (!token) {
+            setError("User authentication token not found");
+            setLoading(false);
+            return;
+          }
+
           const response = await axiosInstance.post(
             "/payments/create",
             {
@@ -77,13 +90,16 @@ const PaymentPage = () => {
         </h1>
         {loading ? (
           <div className="flex flex-col items-center">
-            <p className="text-gray-500 text-lg mb-4">Loading payment details...</p>
+            <p className="text-gray-500 text-lg mb-4">
+              Loading payment details...
+            </p>
             <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
           </div>
         ) : error ? (
           <div className="text-red-500 text-center">{error}</div>
         ) : (
-          clientSecret && paymentId && (
+          clientSecret &&
+          paymentId && (
             <Elements stripe={stripePromise} options={stripeOptions}>
               <CheckoutForm
                 totalAmount={totalAmount}
