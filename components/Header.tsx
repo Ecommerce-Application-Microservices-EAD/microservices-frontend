@@ -13,15 +13,20 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { FaClipboardList } from 'react-icons/fa';
+import { decode } from 'jwt-js-decode';
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, token } = useAuth();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (isAuthenticated && token) {
+      const decodedToken = decode(token);
+      console.log('Decoded JWT Payload:', decodedToken.payload);
+    }
+  }, [isAuthenticated, token]);
 
   if (!mounted) {
     return null;
