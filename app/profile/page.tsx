@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
+import { Alert, message } from 'antd';
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ export default function ProfilePage() {
         }
       );
       console.log(response.data);
-      alert("Password changed successfully");
+      message.success('Password changed successfully');
       setShowChangePassword(false);
       setCurrentPassword('');
       setNewPassword('');
@@ -32,7 +34,7 @@ export default function ProfilePage() {
       const errorMessage = (error as any).response?.data || (error as any).message;
       console.error(errorMessage);
       if (errorMessage === "Invalid credentials") {
-        alert("Current password is incorrect");
+        message.error('Current password is incorrect');
       }
     }
   };
@@ -40,7 +42,7 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">Profile Page</h1>
-      <p>Username: {user?.sub}</p>
+      <p className="mb-8">Username: {user?.sub}</p>
       {!showChangePassword ? (
         <Button onClick={() => setShowChangePassword(true)}>
           Change Password

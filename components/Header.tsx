@@ -12,19 +12,21 @@ import {
   UserCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { FaClipboardList } from 'react-icons/fa';
+import { FaClipboardList, FaUserShield } from 'react-icons/fa';
 import { decode } from 'jwt-js-decode';
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { isAuthenticated, logout, token } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     if (isAuthenticated && token) {
       const decodedToken = decode(token);
       console.log('Decoded JWT Payload:', decodedToken.payload);
+      setIsAdmin(decodedToken.payload.role === 'ADMIN');
     }
   }, [isAuthenticated, token]);
 
@@ -50,18 +52,26 @@ export default function Header() {
               <Moon className="h-5 w-5" />
             )}
           </Button>
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-            </Button>
-          </Link>
-
-          <Link href="/orders">
-            <Button variant="ghost" size="icon" className="relative">
-              <FaClipboardList className="h-5 w-5" />
-            </Button>
-          </Link>
-
+          {!isAdmin ? (
+            <>
+              <Link href="/cart">
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/orders">
+                <Button variant="ghost" size="icon" className="relative">
+                  <FaClipboardList className="h-5 w-5" />
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link href="/admin">
+              <Button variant="ghost" size="icon">
+                <FaUserShield className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
           {!isAuthenticated ? (
             <Link href="/auth/login">
               <Button variant="ghost" size="icon">
