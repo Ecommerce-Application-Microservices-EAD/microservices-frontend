@@ -24,11 +24,16 @@ export default function ProfilePage() {
         }
       );
       console.log(response.data);
+      alert("Password changed successfully");
       setShowChangePassword(false);
       setCurrentPassword('');
       setNewPassword('');
     } catch (error) {
-      console.error((error as any).response?.data || (error as any).message);
+      const errorMessage = (error as any).response?.data || (error as any).message;
+      console.error(errorMessage);
+      if (errorMessage === "Invalid credentials") {
+        alert("Current password is incorrect");
+      }
     }
   };
 
@@ -62,7 +67,16 @@ export default function ProfilePage() {
               required
             />
           </div>
-          <Button type="submit">Submit</Button>
+          <div className="flex space-x-4">
+            <Button type="submit">Submit</Button>
+            <Button 
+              type="button" 
+              onClick={() => setShowChangePassword(false)} 
+              className="bg-white border border-black text-black hover:bg-white"
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       )}
     </div>
