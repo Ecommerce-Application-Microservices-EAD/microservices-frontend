@@ -22,21 +22,51 @@ export default function OrderDetails() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-semibold text-center mb-4">Order Details</h1>
-      <div className="bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-black text-xl font-semibold mb-2">Order #{order.orderId}</h2>
-        <p className="text-gray-700">Total Amount: ${order.totalAmount}</p>
-        <p className="text-gray-700">Created : {new Date(order.createdDate).toLocaleString()}</p>
-        <p className="text-gray-700">Updated : {order.lastModifiedDate}</p>
-        <p className="text-gray-700">Status : {order.status}</p>
-        <h3 className="text-lg font-semibold mt-4">Items:</h3>
-        <ul className="list-disc list-inside">
-          {order.items.map((item) => (
-            <li key={item.productId} className="text-gray-700">
-             {item.productId} - {item.name} - ${item.price} x {item.quantity}
-            </li>
-          ))}
-        </ul>
+      <h1 className="text-3xl font-bold text-center mb-6 text-white">Order Details</h1>
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="min-w-full bg-gray-800">
+          <thead>
+            <tr>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Order ID</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Total Amount</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Created</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Updated</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{order.orderId}</td>
+              <td className="py-4 px-6 border-b border-gray-700 text-gray-300">${order.totalAmount}</td>
+              <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{new Date(order.createdDate).toLocaleString()}</td>
+              <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{new Date(order.lastModifiedDate).toLocaleString()}</td>
+              <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{order.status}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 className="text-lg font-semibold mt-4 text-white">Items:</h3>
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="min-w-full bg-gray-800">
+          <thead>
+            <tr>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Product ID</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Name</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Price</th>
+              <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.items.map((item) => (
+              <tr key={item.productId}>
+                <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{item.productId}</td>
+                <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{item.name}</td>
+                <td className="py-4 px-6 border-b border-gray-700 text-gray-300">${item.price}</td>
+                <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{item.quantity}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

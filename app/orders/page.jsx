@@ -7,8 +7,7 @@ import { useAuth } from '@/context/AuthProvider';
 
 const token = localStorage.getItem('jwtToken');
 
-
-export default function Orders({  userId= useAuth().user?.sub }) {
+export default function Orders({ userId = useAuth().user?.sub }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,31 +38,54 @@ export default function Orders({  userId= useAuth().user?.sub }) {
     router.push(`/orders/${order.orderId}?order=${encodeURIComponent(JSON.stringify(order))}`);
   };
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'placed':
+        return 'text-yellow-500';
+      case 'Shipped':
+        return 'text-blue-500';
+      case 'Delivered':
+        return 'text-green-500';
+      case 'Cancelled':
+        return 'text-red-500';
+      default:
+        return 'text-gray-300';
+    }
+  };
+
   if (loading) {
     return <div className="text-center text-white">Loading...</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-semibold text-center mb-4">Your Orders</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 text-white">Your Orders</h1>
       {error ? (
         <div className="text-center text-red-500">{error.message}</div>
       ) : orders.length === 0 ? (
-        <div className="text-center text-gray-700">No orders yet</div>
+        <div className="text-center text-gray-400">No orders yet</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {orders.map((order) => (
-            <div
-              key={order.orderId}
-              className="bg-white p-4 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100"
-              onClick={() => handleOrderClick(order)}
-            >
-              <h2 className="text-xl text-black font-semibold mb-2">Order #{order.orderId}</h2>
-              <p className="text-gray-700">Total Amount: ${order.totalAmount}</p>
-              <p className="text-gray-700">Date: {new Date(order.createdDate).toLocaleString()}</p>
-              <p className="text-gray-700">Status: {order.status}</p>
-            </div>
-          ))}
+        <div className="overflow-x-auto shadow-lg rounded-lg">
+          <table className="min-w-full bg-gray-800">
+            <thead>
+              <tr>
+                <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Order ID</th>
+                <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Total Amount</th>
+                <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
+                <th className="py-3 px-6 border-b-2 border-gray-700 bg-gray-900 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(order => (
+                <tr key={order.orderId} className="cursor-pointer hover:bg-gray-700" onClick={() => handleOrderClick(order)}>
+                  <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{order.orderId}</td>
+                  <td className="py-4 px-6 border-b border-gray-700 text-gray-300">${order.totalAmount}</td>
+                  <td className="py-4 px-6 border-b border-gray-700 text-gray-300">{new Date(order.createdDate).toLocaleString()}</td>
+                  <td className={`py-4 px-6 border-b border-gray-700 ${getStatusClass(order.status)}`}>{order.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
