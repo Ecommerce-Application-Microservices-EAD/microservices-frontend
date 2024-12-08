@@ -54,13 +54,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await axios.post("http://localhost:9000/api/user/login", { username, password });
       const receivedToken = response.data;
+      console.log('receivedToken', receivedToken);
 
       if (receivedToken) {
         setToken(receivedToken);
-        setUser(decode(receivedToken));
+        const decodedToken: any = decode(receivedToken);
+        setUser(decodedToken);
         localStorage.setItem("jwtToken", receivedToken);
-        router.push("/");
+
+        if (decodedToken?.role === 'ADMIN') {
+          router.push("/admin");
+        } else if (decodedToken?.role === 'USER') {
+          router.push("/");
+        }
       }
+      
     } catch (error: any) {
       console.error("Login failed:", error.response?.data || error.message);
       throw new Error(error.response?.data?.message || "Login failed");

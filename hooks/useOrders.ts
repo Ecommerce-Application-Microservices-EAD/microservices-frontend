@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 export const useOrders = () => {
     const [orders, setOrders] = useState<Order[]>([]);
+    const [error, setError] = useState<any>(null);
+
 
 
 useEffect(() => {
@@ -14,12 +16,14 @@ useEffect(() => {
         setOrders(data);
       } catch (err) {
         console.error("Error fetching Orders:", err);
+        setError(err);
       }
     };
     fetchOrders();
   }, []);
 
   return {
-    orders
+    orders,
+    error
   };
 }
