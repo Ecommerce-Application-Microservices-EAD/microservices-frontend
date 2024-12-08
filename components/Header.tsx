@@ -1,23 +1,21 @@
-'use client'
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useAuth } from "@/context/AuthProvider";
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, LogOut, Moon, Sun } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Moon, Sun, Home } from 'lucide-react';
 import Link from 'next/link';
 import { FaClipboardList } from 'react-icons/fa';
-
-
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { isAuthenticated, logout } = useAuth(); 
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
 
   if (!mounted) {
     return null;
@@ -31,20 +29,21 @@ export default function Header() {
           <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
+          <Link href="/">
+            <Button variant="ghost" size="icon">
+              <Home className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-            
             </Button>
           </Link>
-
           <Link href="/orders">
             <Button variant="ghost" size="icon" className="relative">
-            <FaClipboardList className="h-5 w-5" />
-            
+              <FaClipboardList className="h-5 w-5" />
             </Button>
           </Link>
-
           {!isAuthenticated ? (
             <Link href="/auth/login">
               <Button variant="ghost" size="icon">
