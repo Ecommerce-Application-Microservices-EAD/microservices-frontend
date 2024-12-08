@@ -15,7 +15,7 @@ type AuthContextType = {
   loading: boolean;
 };
 
-// Create the AuthContext
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // Loading state to track initialization
+  const [loading, setLoading] = useState(true); 
   const router = useRouter();
 
   useEffect(() => {
