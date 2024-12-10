@@ -22,6 +22,11 @@ export default function Orders() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!userId) {
+      router.push("/auth/login");
+      return;
+    }
+
     const fetchOrders = async () => {
       try {
         const token = getToken(); // Safely get the token
@@ -51,7 +56,7 @@ export default function Orders() {
     };
 
     fetchOrders();
-  }, [userId]);
+  }, [userId, router]);
 
   const handleOrderClick = (order) => {
     router.push(

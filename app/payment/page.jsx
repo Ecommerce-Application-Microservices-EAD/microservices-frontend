@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axiosConfig";
 import PropTypes from "prop-types";
 
@@ -23,6 +23,7 @@ const getToken = () => {
 };
 
 const PaymentPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const totalAmount = parseFloat(searchParams.get("amount"));
   const userId = searchParams.get("userId");
@@ -34,6 +35,19 @@ const PaymentPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = getToken();
+
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (!totalAmount || !userId || !items) {
+      setError("Missing required parameters");
+      setLoading(false);
+      return;
+    }
+
     if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
       setError("Stripe public key is not defined");
       setLoading(false);
@@ -43,13 +57,6 @@ const PaymentPage = () => {
     if (totalAmount > 0) {
       const fetchClientSecret = async () => {
         try {
-          const token = getToken(); // Safely get the token
-          if (!token) {
-            setError("User authentication token not found");
-            setLoading(false);
-            return;
-          }
-
           const response = await axiosInstance.post(
             "/payments/create",
             {
@@ -78,7 +85,7 @@ const PaymentPage = () => {
     } else {
       setLoading(false);
     }
-  }, [totalAmount, userId]);
+  }, [totalAmount, userId, items, router]);
 
   const stripeOptions = useMemo(() => ({ clientSecret }), [clientSecret]);
 

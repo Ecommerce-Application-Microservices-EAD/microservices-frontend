@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Cart from "./Cart";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
@@ -11,9 +11,14 @@ const CartPage = () => {
   const [showProducts, setShowProducts] = useState(false);
   
   const { user } = useAuth();
-  const userId = user?.sub
-
+  const userId = user?.sub;
   const router = useRouter();
+
+  useEffect(() => {
+    if (!userId) {
+      router.push("/auth/login");
+    }
+  }, [userId, router]);
 
   const handleTotalAmount = (amount) => {
     setTotalAmount(amount);
@@ -43,36 +48,32 @@ const CartPage = () => {
           Your Cart
         </h1>
 
-
-
         {showProducts ? (
           <ProductsGrid userId={userId} />
         ) : (
           <>
-          <div className="flex justify-center">
-            <Cart
-              onTotalAmountChange={handleTotalAmount}
-              onCartItemsChange={handleCartItemsChange}
-              userId={userId}
-            />
-          </div>
-          <div className="flex justify-end mt-6 gap-4 px-6">
-            <button
-              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
-              onClick={handleAddMoreItemsClick}
-            >
-              Add More Items
-            </button>
-        
-            <button
-              className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
-              onClick={handleCheckoutClick}
-            >
-              Check Out
-            </button>
-          </div>
-        </>
-        
+            <div className="flex justify-center">
+              <Cart
+                onTotalAmountChange={handleTotalAmount}
+                onCartItemsChange={handleCartItemsChange}
+                userId={userId}
+              />
+            </div>
+            <div className="flex justify-end mt-6 gap-4 px-6">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                onClick={handleAddMoreItemsClick}
+              >
+                Add More Items
+              </button>
+              <button
+                className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                onClick={handleCheckoutClick}
+              >
+                Check Out
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>

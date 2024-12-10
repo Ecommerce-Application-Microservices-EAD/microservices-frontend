@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-const token = localStorage.getItem("jwtToken");
+const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("jwtToken");
+  }
+  return null;
+};
 
 export default function PaymentSuccess({ searchParams }) {
   const { amount, paymentId, userId, items } = searchParams;
@@ -14,6 +19,18 @@ export default function PaymentSuccess({ searchParams }) {
   const router = useRouter();
   
   useEffect(() => {
+    const token = getToken();
+
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (!amount || !paymentId || !userId || !items) {
+      setError("Missing required parameters");
+      return;
+    }
+
     if (performance.navigation.type === 1) {
       router.replace('/');
       return;
@@ -35,7 +52,7 @@ export default function PaymentSuccess({ searchParams }) {
     } else {
       setError('Payment ID not found in URL');
     }
-  }, [paymentId, userId, amount, items]);
+  }, [paymentId, userId, amount, items, router]);
 
   const clearCart = async (userId) => {
     try {
@@ -43,7 +60,7 @@ export default function PaymentSuccess({ searchParams }) {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         }
       );
@@ -59,7 +76,7 @@ export default function PaymentSuccess({ searchParams }) {
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         }
       );
@@ -74,7 +91,7 @@ export default function PaymentSuccess({ searchParams }) {
       const response = await axiosInstance.patch(`/products/${productId}/reduce-quantity?count=${count}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         }
       );
@@ -90,7 +107,7 @@ export default function PaymentSuccess({ searchParams }) {
       const response = await axiosInstance.post('/orders', orderDetails, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
