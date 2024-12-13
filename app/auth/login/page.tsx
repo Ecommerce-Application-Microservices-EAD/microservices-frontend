@@ -19,13 +19,13 @@ export default function LoginPage() {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
 
-    // TODO: Implement actual login logic
     try {
 
       await login(username, password);
+      setError("");
     
     } catch (err: any) {
-      
+     
       setError(err.message);
     
     }
@@ -41,12 +41,13 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+          {error && <Label className='text-red-500 text-sm'>{error}</Label> }
             <div className="space-y-2">
-              <Label htmlFor="username">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="you@example.com"
+                placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -63,9 +64,18 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full">Login</Button>
-          </CardFooter>
+          <CardFooter className="flex flex-col items-center space-y-2">
+          <Button type="submit" className="w-full">Login</Button>
+          <p className="text-sm text-gray-500">
+            Don't have an account?{" "}
+            <span
+              onClick={() => router.push('/auth/signup')}
+              className="text-blue-500 cursor-pointer hover:underline"
+            >
+              Sign Up
+            </span>
+          </p>
+        </CardFooter>
         </form>
       </Card>
     </div>

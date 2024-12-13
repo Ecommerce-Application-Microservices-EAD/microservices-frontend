@@ -12,9 +12,10 @@ type AuthContextType = {
   logout: () => void;
   isAuthenticated: boolean;
   getRole: () => string | null;
+  flowState: string ;
+  updateFlowState: (state: string) => void;
   loading: boolean;
 };
-
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -23,8 +24,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [flowState, setFlowState] = useState<string>("");
 
   useEffect(() => {
     const storedToken =
@@ -77,8 +79,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
     } catch (error: any) {
-      console.error("Login failed:", error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || "Login failed");
+
+      if (axios.isAxiosError(error))  {
+
+        throw new Error(error.response?.data || "Login failed");
+        
+      } else {
+
+        throw new Error("Some other error")
+        
+      }
+      
     }
   };
 
@@ -94,12 +105,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return user.role || null;
   };
 
-  const isAuthenticated = !!token; // Boolean indicating if the user is authenticated
+  const isAuthenticated = !!token;
+
+  const updateFlowState = (state: string): void => {
+    setFlowState(state);
+  };
 
   return (
-    <AuthContext.Provider
-      value={{ user, token, login, logout, isAuthenticated, getRole, loading }}
-    >
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, getRole, loading, updateFlowState, flowState }}>
       {children}
     </AuthContext.Provider>
   );
