@@ -10,7 +10,7 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [showProducts, setShowProducts] = useState(false);
   
-  const { user } = useAuth();
+  const { user , updateFlowState } = useAuth();
   const userId = user?.sub
 
   const router = useRouter();
@@ -26,6 +26,7 @@ const CartPage = () => {
   const handleCheckoutClick = () => {
     if (totalAmount > 0) {
       const cartItemsString = encodeURIComponent(JSON.stringify(cartItems));
+      updateFlowState('checkout');
       router.push(`/payment?amount=${totalAmount}&userId=${userId}&items=${cartItemsString}`);
     } else {
       alert("Please add products to your cart first!");

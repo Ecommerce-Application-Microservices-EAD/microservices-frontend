@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axiosConfig";
 import PropTypes from "prop-types";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const token = localStorage.getItem("jwtToken");
 
@@ -70,6 +71,7 @@ const PaymentPage = () => {
   const stripeOptions = useMemo(() => ({ clientSecret }), [clientSecret]);
 
   return (
+    <ProtectedRoute allowedRoles={["ADMIN","USER"]} allowedFlow='checkout'>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1A202C] to-[#2D3748]">
       <div className="w-full max-w-md bg-black shadow-lg rounded-lg p-6 md:p-8">
         <h1 className="text-2xl md:text-3xl font-semibold text-white mb-6 text-center">
@@ -96,6 +98,7 @@ const PaymentPage = () => {
         )}
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 
