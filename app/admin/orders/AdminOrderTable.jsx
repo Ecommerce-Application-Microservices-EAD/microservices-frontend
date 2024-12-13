@@ -14,9 +14,9 @@ const getToken = () => {
   return null;
 };
 
-export default function AdminOrderTable({ userId }) {
+export default function AdminOrderTable() {
   const { user } = useAuth();
-  userId = userId || user?.sub;
+  //userId = userId || user?.sub;
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ export default function AdminOrderTable({ userId }) {
     };
 
     fetchOrders();
-  }, [userId]);
+  }, []);
 
   const handleOrderClick = (order) => {
     router.push(
