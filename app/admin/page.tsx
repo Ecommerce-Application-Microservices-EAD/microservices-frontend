@@ -12,6 +12,7 @@ import { toast } from "@/components/Toast";
 import { Product } from "../types/Product";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useOrders } from "@/hooks/useOrders";
+import AdminOrderTable from "./orders/AdminOrderTable";
 
 export default function AdminPage() {
   const {
@@ -166,7 +167,8 @@ export default function AdminPage() {
 
         {/* Orders Tab */}
         {activeTab === "orders" && (
-          <OrderTable order={orders}/>
+          
+          <AdminOrderTable />
         )}
       </div>
     </ProtectedRoute>

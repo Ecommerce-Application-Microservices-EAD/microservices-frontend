@@ -4,12 +4,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axiosConfig";
 import PropTypes from "prop-types";
 import ProtectedRoute from "@/components/ProtectedRoute";
-
-const token = localStorage.getItem("jwtToken");
 
 const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
   ssr: false,
@@ -17,7 +15,16 @@ const CheckoutForm = dynamic(() => import("../payment/CheckoutForm"), {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
+// Helper function to safely access localStorage
+const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("jwtToken");
+  }
+  return null;
+};
+
 const PaymentPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const totalAmount = parseFloat(searchParams.get("amount"));
   const userId = searchParams.get("userId");
@@ -29,6 +36,19 @@ const PaymentPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = getToken();
+
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (!totalAmount || !userId || !items) {
+      setError("Missing required parameters");
+      setLoading(false);
+      return;
+    }
+
     if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
       setError("Stripe public key is not defined");
       setLoading(false);
@@ -66,7 +86,7 @@ const PaymentPage = () => {
     } else {
       setLoading(false);
     }
-  }, [totalAmount, userId]);
+  }, [totalAmount, userId, items, router]);
 
   const stripeOptions = useMemo(() => ({ clientSecret }), [clientSecret]);
 
@@ -79,13 +99,16 @@ const PaymentPage = () => {
         </h1>
         {loading ? (
           <div className="flex flex-col items-center">
-            <p className="text-gray-500 text-lg mb-4">Loading payment details...</p>
+            <p className="text-gray-500 text-lg mb-4">
+              Loading payment details...
+            </p>
             <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
           </div>
         ) : error ? (
           <div className="text-red-500 text-center">{error}</div>
         ) : (
-          clientSecret && paymentId && (
+          clientSecret &&
+          paymentId && (
             <Elements stripe={stripePromise} options={stripeOptions}>
               <CheckoutForm
                 totalAmount={totalAmount}

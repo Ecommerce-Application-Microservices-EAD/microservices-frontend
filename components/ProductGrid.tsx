@@ -7,16 +7,17 @@ import { Product } from "@/app/types/Product";
 import { getAllProducts } from "@/services/productService";
 import { addToCart } from "@/services/cartService";
 import { useAuth } from "@/context/AuthProvider";
+import { Modal } from "@/components/modal";
 
 export default function ProductGrid({ products }: { products: Product[] | null }) {
   const [localProducts, setLocalProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const router = useRouter();
   const { user } = useAuth();
   const userId = user?.sub;
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
-
 
   useEffect(() => {
     if (products) {
@@ -34,7 +35,7 @@ export default function ProductGrid({ products }: { products: Product[] | null }
           setLocalProducts(data);
           setQuantities(
             data.reduce((acc: { [key: string]: number }, product: Product) => {
-              acc[product.id.toString()] = 1; 
+              acc[product.id.toString()] = 1;
               return acc;
             }, {} as { [key: string]: number })
           );
@@ -51,6 +52,11 @@ export default function ProductGrid({ products }: { products: Product[] | null }
   };
 
   const handleAddToCart = async (product: Product) => {
+    if (!userId) {
+      setIsModalOpen(true);
+      return;
+    }
+
     const quantity = quantities[product.id.toString()];
     if (quantity < 1) return;
 
@@ -94,76 +100,98 @@ export default function ProductGrid({ products }: { products: Product[] | null }
   }
 
   return (
-<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  {localProducts.map((product) => (
-    <Card
-      key={product.id}
-      className="flex flex-col cursor-pointer"
-      onClick={() => router.push(`/products/${product.id}`)}
-    >
-      <CardContent className="p-4">
-        <img
-          src={getImageFromBase64(product.imageData)}
-          alt={product.name}
-          className="w-full h-48 object-cover rounded-md mb-4"
-        />
-        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{product.name}</h3>
-        <p className="text-xl font-bold text-gray-900 dark:text-gray-100">${product.price}</p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{product.category}</p>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {localProducts.map((product) => (
+          <Card
+            key={product.id}
+            className="flex flex-col cursor-pointer"
+            onClick={() => router.push(`/products/${product.id}`)}
+          >
+            <CardContent className="p-4">
+              <img
+                src={getImageFromBase64(product.imageData)}
+                alt={product.name}
+                className="w-full h-48 object-cover rounded-md mb-4"
+              />
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{product.name}</h3>
+              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">${product.price}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{product.category}</p>
 
-        {product.stock === 0 ? (
-          <p className="text-sm text-red-600 dark:text-red-400 font-semibold mt-2 px-4 py-2 rounded-lg bg-red-100 dark:bg-red-900">
-            Out of Stock
-          </p>
-        ) : (
-          <div className="flex items-center mt-4">
-            <div
-              className={`flex items-center space-x-2 px-2 py-1 rounded-full ${'border border-gray-300 dark:border-gray-700'}`}
-            >
+              {product.stock === 0 ? (
+                <p className="text-sm text-red-600 dark:text-red-400 font-semibold mt-2 px-4 py-2 rounded-lg bg-red-100 dark:bg-red-900">
+                  Out of Stock
+                </p>
+              ) : (
+                <div className="flex items-center mt-4">
+                  <div
+                    className={`flex items-center space-x-2 px-2 py-1 rounded-full ${'border border-gray-300 dark:border-gray-700'}`}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={quantities[product.id.toString()] <= 1}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateQuantity(product.id.toString(), -1);
+                      }}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="px-4 text-sm">{quantities[product.id.toString()]}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={quantities[product.id.toString()] >= product.stock}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateQuantity(product.id.toString(), 1);
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="mt-auto">
               <Button
-                variant="ghost"
-                size="sm"
-                disabled={quantities[product.id.toString()] <= 1}
+                className="w-full"
+                disabled={product.stock === 0 || isLoading}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  updateQuantity(product.id.toString(), -1);
+                  e.stopPropagation(); 
+                  handleAddToCart(product);
                 }}
               >
-                <Minus className="h-4 w-4" />
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {isLoading ? "Adding..." : "Add to Cart"}
               </Button>
-              <span className="px-4 text-sm">{quantities[product.id.toString()]}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={quantities[product.id.toString()] >= product.stock}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateQuantity(product.id.toString(), 1);
-                }}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="mt-auto">
-        <Button
-          className="w-full"
-          disabled={product.stock === 0 || isLoading}
-          onClick={(e) => {
-            e.stopPropagation(); 
-            handleAddToCart(product);
-          }}
-        >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          {isLoading ? "Adding..." : "Add to Cart"}
-        </Button>
-      </CardFooter>
-    </Card>
-  ))}
-</div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
 
-
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2 className="text-lg font-semibold">Not Logged In</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          You need to be logged in to add items to your cart. Please log in to continue.
+        </p>
+        <div className="flex space-x-4 mt-4">
+          <Button
+            className="mt-4"
+            onClick={() => router.push("/auth/login")}
+          >
+            Go to Login
+          </Button>
+          <Button
+            variant="ghost"
+            className="mt-4"
+            onClick={() => setIsModalOpen(false)}
+          >
+            Go Back
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 }

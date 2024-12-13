@@ -16,8 +16,8 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-8">Welcome to NextShop</h1>
       <div className="flex justify-between items-center mb-8">
         <SearchBar onSearchResults={setSearchResults} />
-        <Button>
-          <ShoppingCart className="mr-2 h-4 w-4" /> View Cart
+        <Button asChild>
+          <a href="/cart">View Cart</a>
         </Button>
       </div>
       <h2 className="text-2xl font-semibold mb-4">

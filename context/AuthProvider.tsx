@@ -19,7 +19,9 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -27,25 +29,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [flowState, setFlowState] = useState<string>("");
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("jwtToken");
-    
+    const storedToken =
+      typeof window !== "undefined" ? localStorage.getItem("jwtToken") : null;
+
     if (storedToken) {
       const decodedToken = decode(storedToken);
 
-      if ( decodedToken && typeof decodedToken === "object" && "exp" in decodedToken && typeof decodedToken.exp === "number" && !isTokenExpired(decodedToken.exp)) 
-        {
-          setToken(storedToken);
-          setUser(decodedToken);
-        } 
-        else 
-        {
-          console.warn("Token expired or invalid");
-          localStorage.removeItem("jwtToken");
-        }
+      if (
+        decodedToken &&
+        typeof decodedToken === "object" &&
+        "exp" in decodedToken &&
+        typeof decodedToken.exp === "number" &&
+        !isTokenExpired(decodedToken.exp)
+      ) {
+        setToken(storedToken);
+        setUser(decodedToken);
+      } else {
+        console.warn("Token expired or invalid");
+        localStorage.removeItem("jwtToken");
+      }
     }
 
-    setLoading(false); 
-    
+    setLoading(false);
   }, []);
 
   const isTokenExpired = (exp: number): boolean => {
@@ -54,14 +59,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.post("http://localhost:9000/api/user/login", { username, password });
-      const receivedToken = response.data;
+      const response = await axios.post(
+        "http://localhost:9000/api/user/login",
+        { username, password }
+      );
+      const receivedToken = response.data; // Ensure the API returns the token string
 
       if (receivedToken) {
         setToken(receivedToken);
-        setUser(decode(receivedToken));
-        localStorage.setItem("jwtToken", receivedToken);
-        router.push("/");
+        const decodedToken: any = decode(receivedToken);
+        setUser(decodedToken);
+        localStorage.setItem("jwtToken", receivedToken); // Store the token
+
+        // Redirect based on user role
+        if (decodedToken?.role === "ADMIN") {
+          router.push("/admin");
+        } else if (decodedToken?.role === "USER") {
+          router.push("/");
+        }
       }
     } catch (error: any) {
 
@@ -81,8 +96,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("jwtToken");
-    router.push("/");
+    localStorage.removeItem("jwtToken"); // Remove token from localStorage
+    router.push("/"); // Redirect to home page
   };
 
   const getRole = (): string | null => {
@@ -103,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
