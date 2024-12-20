@@ -9,6 +9,7 @@ const CartPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [showProducts, setShowProducts] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const { user , updateFlowState } = useAuth();
   const userId = user?.sub;
@@ -17,6 +18,8 @@ const CartPage = () => {
   useEffect(() => {
     if (!userId) {
       router.push("/auth/login");
+    } else {
+      setLoading(false);
     }
   }, [userId, router]);
 
@@ -41,6 +44,16 @@ const CartPage = () => {
   const handleAddMoreItemsClick = () => {
     router.push("/");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-[#1A202C] dark:via-[#2D3748] dark:to-[#4A5568] py-8">
+        <div className="text-2xl font-semibold text-gray-800 dark:text-white">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-[#1A202C] dark:via-[#2D3748] dark:to-[#4A5568] py-8">

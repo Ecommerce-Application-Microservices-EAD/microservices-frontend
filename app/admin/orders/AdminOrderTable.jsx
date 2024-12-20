@@ -22,6 +22,7 @@ export default function AdminOrderTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
   const router = useRouter();
 
   useEffect(() => {
@@ -46,9 +47,9 @@ export default function AdminOrderTable() {
       } catch (error) {
         console.error(
           "Error fetching orders:",
-          error.response?.data || error.message
+            error.message , '\n' , error.response?.data
         );
-        setError(error.response?.data || error.message);
+        setError("Error fetching orders : " + error.message);
       } finally {
         setLoading(false);
       }
@@ -66,6 +67,7 @@ export default function AdminOrderTable() {
   };
 
   const filterOrders = (filter) => {
+    setActiveFilter(filter);
     const now = dayjs();
     let filtered = orders;
 
@@ -81,6 +83,8 @@ export default function AdminOrderTable() {
       filtered = orders.filter((order) =>
         dayjs(order.createdDate).isSame(now, "month")
       );
+    } else if (filter === "all") {
+      filtered = orders;
     }
 
     setFilteredOrders(filtered);
@@ -96,6 +100,21 @@ export default function AdminOrderTable() {
     }
   };
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "placed":
+        return "text-yellow-500";
+      case "Shipped":
+        return "text-blue-500";
+      case "Delivered":
+        return "text-green-500";
+      case "Cancelled":
+        return "text-red-500";
+      default:
+        return "text-gray-300";
+    }
+  };
+
   if (loading) {
     return <div className="text-center text-white">Loading...</div>;
   }
@@ -105,19 +124,25 @@ export default function AdminOrderTable() {
       <h1 className="text-3xl font-bold text-center mb-6 text-white">Orders</h1>
       <div className="flex justify-center mb-4">
         <button
-          className="mx-2 px-4 py-2 bg-blue-500 text-white rounded"
+          className={`mx-2 px-4 py-2 rounded ${activeFilter === "all" ? "bg-blue-700 text-white" : "bg-blue-500 text-white"}`}
+          onClick={() => filterOrders("all")}
+        >
+          All
+        </button>
+        <button
+          className={`mx-2 px-4 py-2 rounded ${activeFilter === "today" ? "bg-blue-700 text-white" : "bg-blue-500 text-white"}`}
           onClick={() => filterOrders("today")}
         >
           Today
         </button>
         <button
-          className="mx-2 px-4 py-2 bg-blue-500 text-white rounded"
+          className={`mx-2 px-4 py-2 rounded ${activeFilter === "thisWeek" ? "bg-blue-700 text-white" : "bg-blue-500 text-white"}`}
           onClick={() => filterOrders("thisWeek")}
         >
           This Week
         </button>
         <button
-          className="mx-2 px-4 py-2 bg-blue-500 text-white rounded"
+          className={`mx-2 px-4 py-2 rounded ${activeFilter === "thisMonth" ? "bg-blue-700 text-white" : "bg-blue-500 text-white"}`}
           onClick={() => filterOrders("thisMonth")}
         >
           This Month
@@ -135,6 +160,11 @@ export default function AdminOrderTable() {
           ))}
         </select>
       </div>
+      {error && (
+        <div className="text-center text-red-500">
+          {error}
+        </div>
+      )}
       {error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : filteredOrders.length === 0 ? (
@@ -180,7 +210,7 @@ export default function AdminOrderTable() {
                   <td className="py-4 px-6 border-b border-gray-700 text-gray-300">
                     {new Date(order.createdDate).toLocaleString()}
                   </td>
-                  <td className="py-4 px-6 border-b border-gray-700 text-gray-300">
+                  <td className={`py-4 px-6 border-b border-gray-700 ${getStatusClass(order.status)}`}>
                     {order.status}
                   </td>
                 </tr>
